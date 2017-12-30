@@ -194,6 +194,11 @@ public class FileOperation {
 		return handle;
 	}
 	
+	public long getFileSize(FileHandle handle){
+		
+		return 64*1024;
+	}
+	
 	private int writeChunk(ChunkInfo chunkInfo, int startPos, byte[] buf, int writeLen) throws UnknownHostException, IOException{
 		writeLen = Math.min(CHUNK_SIZE-startPos, Math.min(buf.length, writeLen));
 		if(writeLen <= 0){

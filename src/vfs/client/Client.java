@@ -18,6 +18,9 @@ public class Client {
 	String masterIP;
 	int masterPort;
 	
+	UploadThread currUploadThread = null;
+	DownloadThread currDownloadThread = null;
+	
 	public Client(String masterIP, int masterPort){
 		this.masterIP = masterIP;
 		this.masterPort = masterPort;
@@ -34,18 +37,35 @@ public class Client {
 	}
 	
 	public boolean upload(String localPath, String remotePath){
-		new UploadThread(localPath, remotePath, this.masterIP, this.masterPort).start();
+		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort);
+		currUploadThread.start();
 		return false;
 	}
 	
 	public boolean download(String localPath, String remotePath){
-		new DownloadThread(localPath, remotePath, this.masterIP, this.masterPort).start();
+		currDownloadThread = new DownloadThread(localPath, remotePath, this.masterIP, this.masterPort);
+		currDownloadThread.start();
 		return false;
 	}
 	
 	public List<RemoteFileInfo> getRemoteFileInfo(){
 		
 		return null;
+	}
+	
+	public float getUploadRate(){
+		if(currUploadThread == null){
+			return 1;
+		}
+		
+		return currUploadThread.getProcessRate();
+	}
+	
+	public float getDownloadRate(){
+		if(currDownloadThread == null){
+			return 1;
+		}
+		return currDownloadThread.getProcessRate();
 	}
 	
 	public class UploadThread extends Thread{
@@ -55,16 +75,24 @@ public class Client {
 		private String localPath = null;
 		private String remotePath = null;
 		
+		private float processRate = 0.f;
+		
 		public UploadThread(String localPath, String remotePath, String masterIP, int masterPort){
 			this.localPath = localPath;
 			this.remotePath = remotePath;
+			this.processRate = 0.f;
 			
 			fileOp = new FileOperation(masterIP, masterPort);
 			remoteFileHandle = fileOp.open(this.remotePath, "wr");
 		}
 		
+		public float getProcessRate(){
+			return this.processRate;
+		}
+		
 		public void run(){
 			File filein = new File(this.localPath);
+			long fileSize = filein.length();
 			FileInputStream localFis = null;
 			try {
 				localFis = new FileInputStream(filein);
@@ -80,11 +108,13 @@ public class Client {
  			try {
  				while((readsize = localFis.read(buf, 0, buf.length))>0){
  					fileOp.write(remoteFileHandle, buf, readsize);
+ 					this.processRate += readsize/Math.max(1.f, fileSize);
  				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+ 			this.processRate = 1.f;
 		}
 	}
 	
@@ -95,12 +125,19 @@ public class Client {
 		private FileOperation fileOp = null;
 		private FileHandle remoteFileHandle = null;
 		
+		private float processRate = 0.f;
+		
 		public DownloadThread(String localPath, String remotePath, String masterIP, int masterPort){
 			this.localPath = localPath;
 			this.remotePath = remotePath;
+			this.processRate = 0.f;
 			
 			fileOp = new FileOperation(masterIP, masterPort);
 			remoteFileHandle = fileOp.open(this.remotePath, "r");
+		}
+		
+		public float getProcessRate(){
+			return this.processRate;
 		}
 		
 		public void run(){
@@ -113,6 +150,8 @@ public class Client {
 				e.printStackTrace();
 			}
 			
+			long fileTotalSize = fileOp.getFileSize(remoteFileHandle);
+			
 			int bufferSize = 64*1024;
 			int readsize = 0;
 			
@@ -121,12 +160,13 @@ public class Client {
 				while((readsize = fileOp.read(remoteFileHandle, buf, bufferSize)) > 0){
 					localFos.write(buf, 0, readsize);
 					localFos.flush();
+					this.processRate += readsize/Math.max(1.f, fileTotalSize);
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+			this.processRate = 1.f;
 		}
 	}
 	
