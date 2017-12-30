@@ -1,5 +1,6 @@
 package vfs.client;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -15,6 +16,7 @@ import vfs.struct.VSFProtocols;
 public class FileOperation {
 	static final int CHUNK_SIZE = 64*1024; // *1024;
 	static final int UPLOAD_BUFFER_SIZE = 8*1024;
+	static final int DOWNLOAD_BUFFER_SIZE = 8*1024;
 	
 	private String masterIP = null;
 	private int masterPort = 0;
@@ -92,7 +94,8 @@ public class FileOperation {
 			int writeByteNum = 0;
 			ChunkInfo currentChunk = handle.getChunkInfoByIndex(firstChunkIndex + writeChunkCount);
 			if(currentChunk == null){
-				System.out.println("invalid file handle");
+				System.out.println("error: invalid file handle!");
+				return -1;
 			}
 			
 			int writeLen = Math.min(nbyteLeft, CHUNK_SIZE);
@@ -126,8 +129,58 @@ public class FileOperation {
 	}
 	
 	public int read(FileHandle handle, byte[] buf, int nbyte){
+		if(nbyte <= 0){
+			return 0;
+		}
+
+		int offset = handle.offset;
+		int firstChunkIndex = (int) Math.floor(offset/CHUNK_SIZE);
+		int firstChunkOffset = (int) offset%CHUNK_SIZE;
+		int nbyteLeft = Math.min(nbyte, buf.length);
 		
-		return 0;
+		int chunkNum = 0;
+		if(nbyteLeft + firstChunkOffset <= CHUNK_SIZE){
+			chunkNum = 1;
+		}else{
+			chunkNum = 1 + (int) Math.ceil((nbyteLeft - (CHUNK_SIZE - firstChunkOffset))/CHUNK_SIZE);
+		}
+		
+		byte[] chunkBuf = new byte[CHUNK_SIZE];
+		int readByteCount = 0;
+		for(int readChunkCount = 0; readChunkCount < chunkNum; ++readChunkCount){
+			int readByteNum = 0;
+			ChunkInfo currentChunk = handle.getChunkInfoByIndex(firstChunkIndex + readChunkCount);
+			if(currentChunk == null){
+				handle.offset += readByteCount;
+				return readByteCount;  // read range overflow
+			}
+			
+			int readLen = Math.min(nbyteLeft, CHUNK_SIZE);
+
+			try {
+				if(readByteCount == 0){
+					readByteNum = readChunk(currentChunk, firstChunkOffset, chunkBuf, readLen);
+				}else{
+					readByteNum = readChunk(currentChunk, 0, chunkBuf, readLen);
+				}
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			for(int i = 0; i < readByteNum; ++i){
+				buf[readByteCount+i] = chunkBuf[i];
+			}
+			
+			readByteCount += readByteNum;
+			nbyteLeft -= readByteNum;
+		}
+		
+		handle.offset += readByteCount;
+		return readByteCount;
 	}
 	
 	public FileHandle setFileSize(FileHandle handle , int fileSize){
@@ -142,7 +195,7 @@ public class FileOperation {
 	}
 	
 	private int writeChunk(ChunkInfo chunkInfo, int startPos, byte[] buf, int writeLen) throws UnknownHostException, IOException{
-		writeLen = Math.min(writeLen-startPos, Math.min(buf.length, writeLen));
+		writeLen = Math.min(CHUNK_SIZE-startPos, Math.min(buf.length, writeLen));
 		if(writeLen <= 0){
 			return 0;
 		}
@@ -207,19 +260,95 @@ public class FileOperation {
 			contentCount += writeNum;
 		}
 		
+		DataInputStream input = new DataInputStream(socket.getInputStream());
+		System.out.println("wait response"); 
+		String ret = input.readUTF();     
+        System.out.println("response code: " + ret);    
+        // 如接收到 "OK" 则断开连接    
+        if ("OK".equals(ret)) {    
+            System.out.println("client close");    
+            try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}    
+        } 
+		
+		input.close();
 		out.close();
 		socket.close();
 		return contentCount;
 	}
 	
-	private boolean readChunk(ChunkInfo chunkInfo, byte[] buf){
+	private int readChunk(ChunkInfo chunkInfo, int startPos ,byte[] buf, int readLen) throws UnknownHostException, IOException{
+		readLen = Math.min(CHUNK_SIZE-startPos, Math.min(buf.length, readLen));
+		if(readLen <= 0){
+			return 0;
+		}
 		
-		return false;
+		Socket socket = new Socket(chunkInfo.slaveIP, chunkInfo.port);
+		OutputStream out = socket.getOutputStream();
+		
+		// protocol id
+		byte[] protocolBuf = new byte[8];
+		this.writeInt(out, protocolBuf, VSFProtocols.READ_CHUNK);
+		// chunk_id
+		byte[] chunkBuf = new byte[64];
+		this.writeInt(out, chunkBuf, chunkInfo.chunkId);
+		// offset
+		byte[] offsetBuf = new byte[64];
+		this.writeInt(out, offsetBuf, startPos);
+		// read len
+		byte[] lenBuf = new byte[64];
+		this.writeInt(out, lenBuf, readLen);
+		
+		out.flush();
+		
+		//content from server
+		DataInputStream input = new DataInputStream(socket.getInputStream());
+		String ret = input.readUTF();     
+        System.out.println("response code: " + ret);    
+
+        int currBufCount = 0;
+        if ("OK".equals(ret)) {    
+            // start downloading
+        	int totalSize = input.readInt();  
+        	
+        	byte[] tempBuf = new byte[FileOperation.DOWNLOAD_BUFFER_SIZE];
+        	
+        	while(true){
+        		if(currBufCount >= totalSize){
+        			break;
+        		}
+        		int cRead = Math.min(totalSize - currBufCount, tempBuf.length);
+        		int aRead = input.read(tempBuf, 0, cRead);
+        		
+        		for(int i = 0; i < aRead; ++i){
+        			buf[currBufCount+i] = tempBuf[i];
+        		}
+        		currBufCount += aRead;
+        	}
+        } else{
+        	System.out.println("fail to read chunk "+ chunkInfo.chunkId + " at " + chunkInfo.slaveIP + ":" + chunkInfo.port);
+        }
+        
+		socket.close();
+		return currBufCount;
 	}
 	
 	private boolean appendChunk(ChunkInfo chunkInfo, byte[] buf, int nbyte){
 		
 		return false;
+	}
+	
+	private void writeInt(OutputStream out, byte[] buf , int value) throws IOException{
+		byte[] valBytes = Integer.toString(value).getBytes();
+		for(int i = 0; i < valBytes.length; ++i){
+			buf[i] = valBytes[i];
+		}
+		buf[valBytes.length] = '\0';
+		out.write(buf, 0, buf.length);
 	}
 }
 
