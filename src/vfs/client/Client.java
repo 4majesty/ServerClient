@@ -26,7 +26,7 @@ public class Client {
 		this.masterPort = masterPort;
 	}
 	
-	public boolean create(String remotePath){
+	public boolean create(String remotePath, boolean isDir){
 		
 		return false;
 	}
@@ -36,19 +36,17 @@ public class Client {
 		return false;
 	}
 	
-	public boolean upload(String localPath, String remotePath){
+	public void upload(String localPath, String remotePath){
 		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort);
 		currUploadThread.start();
-		return false;
 	}
 	
-	public boolean download(String localPath, String remotePath){
+	public void download(String localPath, String remotePath){
 		currDownloadThread = new DownloadThread(localPath, remotePath, this.masterIP, this.masterPort);
 		currDownloadThread.start();
-		return false;
 	}
 	
-	public List<RemoteFileInfo> getRemoteFileInfo(){
+	public List<RemoteFileInfo> getRemoteFileInfo(String remotePath){
 		
 		return null;
 	}
