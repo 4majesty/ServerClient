@@ -3,6 +3,7 @@ package vfs.struct;
 import java.util.LinkedList;
 import java.util.List;
 
+// TODO add lock for writing offset
 public class FileHandle {
 	public int handle;
 	public int offset;
@@ -19,5 +20,16 @@ public class FileHandle {
 		}
 		
 		return null;
+	}
+	
+	public int getMaxChunkIndex(){
+		int maxIndex = 0;
+		for(int i = 0;i < chunkList.size(); ++i){
+			if(maxIndex < chunkList.get(i).fileIndex){
+				maxIndex = chunkList.get(i).fileIndex;
+			}
+		}
+		
+		return maxIndex;
 	}
 }
