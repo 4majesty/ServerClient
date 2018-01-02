@@ -7,10 +7,6 @@ public class ChunkInfo {
 	public int fileIndex; // index for corresponding file
 	public int chunkLeft; // chunk's size is 64MB. for development, chunk's size is 64k
 	
-	public ChunkInfo(int chunkId){
-		this.chunkId = chunkId;
-	}
-	
 	public ChunkInfo(int chunkId, String slaveIP, int port, int fileIndex, int chunkLeft){
 		this.chunkId = chunkId;
 		this.slaveIP = slaveIP;

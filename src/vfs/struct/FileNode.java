@@ -1,6 +1,6 @@
 package vfs.struct;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -13,14 +13,15 @@ public class FileNode {
 	public FileNode parent;
 	public FileNode child;
 	public FileNode brother;
-	public HashMap<Integer, ChunkInfo> fileChunkTable = new HashMap<Integer, ChunkInfo>();
+	public ArrayList<Integer> chunkIDList;
 
 	public FileNode() {
 	}
 
-	public FileNode(String fileName, boolean isDir) {
+	public FileNode(String fileName, boolean isDir, FileNode parent) {
 		this.fileName = fileName;
 		this.isDir = isDir;
+		this.parent = parent;
 	}
 
 	public FileNode findChildWithName(String name) {
@@ -55,14 +56,8 @@ public class FileNode {
 			obj.put("child", child.toJSON());
 		if (!isDir) {
 			JSONArray chunk_ids = new JSONArray();
-			for (ChunkInfo chunkInfo : fileChunkTable.values()) {
-//				JSONObject chunk = new JSONObject();
-//				chunk.put("chunk_id", chunkInfo.chunkId);
-//				chunk.put("slave_ip", chunkInfo.slaveIP);
-//				chunk.put("port", chunkInfo.port);
-//				chunk.put("file_index", chunkInfo.fileIndex);
-//				chunk.put("chunk_left", chunkInfo.chunkLeft);
-				chunk_ids.put(chunkInfo.chunkId);
+			for (Integer chunkID : chunkIDList) {
+				chunk_ids.put(chunkID);
 			}
 			obj.put("chunk_ids", chunk_ids);
 		}
@@ -83,10 +78,9 @@ public class FileNode {
 			}
 		} else {
 			JSONArray chunk_ids = obj.getJSONArray("chunk_ids");
-			fileChunkTable = new HashMap<Integer, ChunkInfo>();
+			chunkIDList = new ArrayList<Integer>();
 			for (int i = 0; i < chunk_ids.length(); i++) {
-				ChunkInfo chunkInfo = new ChunkInfo(chunk_ids.getInt(i));
-				fileChunkTable.put(chunkInfo.chunkId, chunkInfo);
+				chunkIDList.add(chunk_ids.getInt(i));
 			}
 		}
 		if (obj.has("brother")) {
