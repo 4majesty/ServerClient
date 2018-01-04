@@ -29,9 +29,8 @@ public class FileOperation {
 		this.masterPort = masterPort;
 	}
 	
-	public FileNode getFileNode(){
-		FileNode fileNode = new FileNode();
-		
+	public FileHierarchy getFileHierarchy(){
+		FileHierarchy fileHierarchy = null;
 		try {
 			Socket socket = new Socket(this.masterIP, this.masterPort);
 			OutputStream out = socket.getOutputStream();
@@ -49,7 +48,7 @@ public class FileOperation {
 	        	// TODO get json file and parse the file node
 	        	String jsonStr = new String();
 	        	JSONObject config = new JSONObject(jsonStr);
-	        	fileNode.parseJSON(config, null);
+	        	fileHierarchy = new FileHierarchy(config);
 	        }
 			
 		} catch (UnknownHostException e) {
@@ -60,8 +59,42 @@ public class FileOperation {
 			e.printStackTrace();
 		}
 		
-		return fileNode;
+		return fileHierarchy;
 	}
+	
+//	public FileNode getFileNode(){
+//		FileNode fileNode = new FileNode();
+//		
+//		try {
+//			Socket socket = new Socket(this.masterIP, this.masterPort);
+//			OutputStream out = socket.getOutputStream();
+//			
+//			// protocol id 
+//			byte[] protocolBuf = new byte[8];
+//			this.writeInt(out, protocolBuf, VSFProtocols.GET_FILE_NODE);
+//			
+//			//response from server
+//			DataInputStream input = new DataInputStream(socket.getInputStream());
+//			String ret = input.readUTF();     
+//	        System.out.println("response code: " + ret);
+//	        
+//	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+//	        	// TODO get json file and parse the file node
+//	        	String jsonStr = new String();
+//	        	JSONObject config = new JSONObject(jsonStr);
+//	        	fileNode.parseJSON(config, null);
+//	        }
+//			
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		return fileNode;
+//	}
 	
 	public boolean mkdir(String dirName){
 		try {
@@ -130,27 +163,28 @@ public class FileOperation {
 	}
 	
 	public FileHandle open(String remotePath, String mode){
+		// TODO file privilege
 		FileHandle tempHandle = new FileHandle(2); // 2 for r&w
-		tempHandle.handle = 0;
-		tempHandle.offset = 0;
-		tempHandle.mode = 2;
-		
-		RemoteFileInfo fileInfo = new RemoteFileInfo();
-		fileInfo.remotePath = remotePath;
-		fileInfo.fileName = remotePath;
-		fileInfo.fileType = 0;
-		tempHandle.fileInfo = fileInfo;
-		
-		ChunkInfo chunk0 = new ChunkInfo(1001, "127.0.0.1", 8877, 0, -1);
-		ChunkInfo chunk1 = new ChunkInfo(1002, "127.0.0.1", 8877, 1, -1);
-		ChunkInfo chunk2 = new ChunkInfo(1003, "127.0.0.1", 8877, 2, -1);
-		ChunkInfo chunk3 = new ChunkInfo(1003, "127.0.0.1", 8877, 3, -1);
-		List<ChunkInfo> chunkList = new LinkedList<ChunkInfo>();
-		chunkList.add(chunk0);
-		chunkList.add(chunk1);
-		chunkList.add(chunk2);
-		chunkList.add(chunk3);
-		tempHandle.chunkList = chunkList;
+//		tempHandle.handle = 0;
+//		tempHandle.offset = 0;
+//		tempHandle.mode = 2;
+//		
+//		RemoteFileInfo fileInfo = new RemoteFileInfo();
+//		fileInfo.remotePath = remotePath;
+//		fileInfo.fileName = remotePath;
+//		fileInfo.fileType = 0;
+//		tempHandle.fileInfo = fileInfo;
+//		
+//		ChunkInfo chunk0 = new ChunkInfo(1001, "127.0.0.1", 8877, 0, -1);
+//		ChunkInfo chunk1 = new ChunkInfo(1002, "127.0.0.1", 8877, 1, -1);
+//		ChunkInfo chunk2 = new ChunkInfo(1003, "127.0.0.1", 8877, 2, -1);
+//		ChunkInfo chunk3 = new ChunkInfo(1003, "127.0.0.1", 8877, 3, -1);
+//		List<ChunkInfo> chunkList = new LinkedList<ChunkInfo>();
+//		chunkList.add(chunk0);
+//		chunkList.add(chunk1);
+//		chunkList.add(chunk2);
+//		chunkList.add(chunk3);
+//		tempHandle.chunkList = chunkList;
 		
 		try {
 			Socket socket = new Socket(this.masterIP, this.masterPort);

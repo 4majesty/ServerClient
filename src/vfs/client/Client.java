@@ -19,7 +19,8 @@ public class Client {
 	String masterIP = null;
 	int masterPort = 0;
 	FileOperation fileOp = null;
-	FileNode rootFileNode = null;
+//	FileNode rootFileNode = null;
+	FileHierarchy fileHierachy = null; // TODO when fileHierachy expire, refresh fileHierachy
 	
 	UploadThread currUploadThread = null;
 	DownloadThread currDownloadThread = null;
@@ -29,31 +30,54 @@ public class Client {
 		this.masterPort = masterPort;
 		
 		this.fileOp = new FileOperation(this.masterIP, this.masterPort);
-		rootFileNode = this.fileOp.getFileNode();
+//		this.rootFileNode = this.fileOp.getFileNode();
+		
+		this.fileHierachy = this.fileOp.getFileHierarchy();
 	}
 	
 	public boolean create(String remotePath, boolean isDir){
 		boolean res = false;
 		
-		if(isDir){
-			res = this.fileOp.mkdir(remotePath);
-		}else{
-			res = this.fileOp.creat(remotePath);
+		if(this.fileHierachy == null){
+			this.fileHierachy = this.fileOp.getFileHierarchy();
 		}
 		
-		if(rootFileNode == null){
-			rootFileNode = this.fileOp.getFileNode();
+		String path = this.getFileDir(remotePath);
+		String dirName = this.getFileName(remotePath);
+		if(isDir){
+			res = this.fileOp.mkdir(remotePath);
+			if(res){
+				this.fileHierachy.mkdir(path, dirName);
+			}
+		}else{
+			res = this.fileOp.creat(remotePath);
+			if(res){
+				this.fileHierachy.openFile(path, dirName);
+			}
+		}
+		
+		if(res){
+			if(isDir){
+				this.fileHierachy.mkdir(path, dirName);
+			}else{
+				this.fileHierachy.openFile(path, dirName);
+			}
 		}
 		
 		return res;
 	}
 	
-	public boolean delete(String remotePath){		
-		if(this.fileOp.remove(remotePath)){
-			rootFileNode = this.fileOp.getFileNode();
-			return true;
+	public boolean delete(String remotePath){
+		String path = this.getFileDir(remotePath);
+		String dirName = this.getFileName(remotePath);
+		
+		if(this.fileHierachy == null){
+			this.fileHierachy = this.fileOp.getFileHierarchy();
 		}
-		// TODO remove relative FileNode
+		
+		if(this.fileOp.remove(remotePath)){
+			this.fileHierachy.remove(path, dirName);
+		}
 		
 		return false;
 	}
@@ -61,7 +85,8 @@ public class Client {
 	public void upload(String localPath, String remotePath){
 		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort);
 		currUploadThread.start();
-		rootFileNode = this.fileOp.getFileNode();
+//		rootFileNode = this.fileOp.getFileNode();
+
 	}
 	
 	public void download(String localPath, String remotePath){
@@ -189,6 +214,21 @@ public class Client {
 			}
 			this.processRate = 1.f;
 		}
+	}
+	
+	private String getFileDir(String filePath) {
+		String[] names = filePath.split("[/\\\\]");
+		StringBuilder path = new StringBuilder();
+		for(int i = 0; i < names.length-1; ++i){
+			path = path.append("/" + names[i]);
+		}
+		
+		return path.toString();
+	}
+	
+	private String getFileName(String filePath){
+		String[] names = filePath.split("[/\\\\]");
+		return names[names.length-1];
 	}
 	
     public static void main(String[] args) {
