@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import vfs.struct.ChunkInfo;
 import vfs.struct.FileHandle;
 import vfs.struct.FileNode;
@@ -28,7 +30,7 @@ public class FileOperation {
 	}
 	
 	public FileNode getFileNode(){
-		FileNode fileNode = null;
+		FileNode fileNode = new FileNode();
 		
 		try {
 			Socket socket = new Socket(this.masterIP, this.masterPort);
@@ -45,6 +47,9 @@ public class FileOperation {
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 	        	// TODO get json file and parse the file node
+	        	String jsonStr = new String();
+	        	JSONObject config = new JSONObject(jsonStr);
+	        	fileNode.parseJSON(config, null);
 	        }
 			
 		} catch (UnknownHostException e) {
@@ -125,7 +130,7 @@ public class FileOperation {
 	}
 	
 	public FileHandle open(String remotePath, String mode){
-		FileHandle tempHandle = new FileHandle();
+		FileHandle tempHandle = new FileHandle(2); // 2 for r&w
 		tempHandle.handle = 0;
 		tempHandle.offset = 0;
 		tempHandle.mode = 2;
@@ -166,8 +171,11 @@ public class FileOperation {
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 	        	// TODO get json file and parse the filehandle
-	        }
-	        
+	        	String jsonStr = new String();
+	        	JSONObject config = new JSONObject(jsonStr);
+	        	
+	        	tempHandle.parseJSON(config);
+	        }  
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block

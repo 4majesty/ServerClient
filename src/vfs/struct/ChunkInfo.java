@@ -1,5 +1,7 @@
 package vfs.struct;
 
+import org.json.JSONObject;
+
 public class ChunkInfo {
 	public int chunkId;
 	public String slaveIP;
@@ -13,5 +15,17 @@ public class ChunkInfo {
 		this.port = port;
 		this.fileIndex = fileIndex;
 		this.chunkLeft = chunkLeft;
+	}
+	
+	public ChunkInfo(){
+		
+	}
+	
+	public void parseJSON(JSONObject obj){
+		this.chunkId = obj.getInt("chunkId");
+		this.slaveIP = obj.getString("slaveIP");
+		this.port = obj.getInt("port");
+		this.chunkLeft = obj.getInt("chunkLeft");
+		this.fileIndex = obj.getInt("fileIndex");
 	}
 }
