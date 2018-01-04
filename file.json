@@ -1,0 +1,23 @@
+"file_hierarchy": {
+  "is_dir": true,
+  "name": "vfs",
+  "child": {
+   "is_dir": true,
+   "name": "a",
+   "brother": {
+    "is_dir": false,
+    "name": "b",
+    "chunk_ids": [
+     1,
+     2
+    ]
+   },
+   "child": {
+    "is_dir": false,
+    "name": "c",
+    "chunk_ids": [
+     3
+    ]
+   }
+  }
+ }
