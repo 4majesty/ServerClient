@@ -142,6 +142,12 @@ public class TestSocketServer {
                     if(protocol == 1001){
                     	readChunk(in, out);
                     }
+                    if(protocol == 3007){
+                    	out.writeUTF("OK");
+                    }
+                    if(protocol == 3006){
+                    	out.writeUTF("OK");
+                    }
                     break;
 				}
 				
@@ -156,6 +162,7 @@ public class TestSocketServer {
 				e.printStackTrace();
 			}
 		}
+		
 		
 		private void writeChunk(InputStream in, DataOutputStream out) throws IOException{
 			System.out.println("start to write chunk..");

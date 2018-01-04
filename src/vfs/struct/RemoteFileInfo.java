@@ -13,4 +13,13 @@ public class RemoteFileInfo {
 		this.fileType = obj.getInt("fileType");
 		this.remotePath = obj.getString("remotePath");
 	}
+	
+	public JSONObject toJSON(){
+		JSONObject obj = new JSONObject();
+		obj.put("fileName", fileName);
+		obj.put("fileType", fileType);
+		obj.put(remotePath, remotePath);
+		
+		return obj;
+	}
 }

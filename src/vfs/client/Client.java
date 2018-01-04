@@ -98,10 +98,10 @@ public class Client {
 	public List<RemoteFileInfo> getRemoteFileInfo(String remotePath){
 		List<RemoteFileInfo> fileInfoList = new LinkedList<RemoteFileInfo>();
 		
-		String path = this.getFileDir(remotePath);
-		String dirName = this.getFileName(remotePath);
+//		String path = this.getFileDir(remotePath);
+//		String dirName = this.getFileName(remotePath);
 		
-		FileNode fileNode = this.fileHierachy.openFile(path, dirName);
+		FileNode fileNode = this.fileHierachy.OpenDir(remotePath);
 		if(fileNode.child ==  null){
 			return fileInfoList; 
 		}else{
@@ -110,9 +110,10 @@ public class Client {
 				RemoteFileInfo currFileInfo = new RemoteFileInfo();
 				currFileInfo.fileName = currNode.fileName;
 				currFileInfo.fileType = currNode.isDir?1:0;
-				currFileInfo.remotePath = path;
+				currFileInfo.remotePath = remotePath;
 				
 				fileInfoList.add(currFileInfo);
+				currNode = currNode.brother;
 			}
 		}
 		
@@ -240,7 +241,7 @@ public class Client {
 		String[] names = filePath.split("[/\\\\]");
 		StringBuilder path = new StringBuilder();
 		for(int i = 0; i < names.length-1; ++i){
-			path = path.append("/" + names[i]);
+			path = path.append(names[i] + "/");
 		}
 		
 		return path.toString();
@@ -264,11 +265,14 @@ public class Client {
 //        System.out.println(list);
 //        
 //        System.out.println('\0');
-    	Client client = new Client("127.0.0.1", 8807);
+    	Client client = new Client("127.0.0.1", 8877);
+    	
+    	client.getRemoteFileInfo("vfs");
+    	client.delete("vfs/b");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc2.txt");
     	
-    	client.download("/Users/zsy/Documents/workspace/Java/download.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
+//    	client.download("/Users/zsy/Documents/workspace/Java/download.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
     }
 	
 }

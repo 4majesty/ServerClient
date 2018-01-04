@@ -59,6 +59,10 @@ public class FileHierarchy {
 		}
 		return fileNode;
 	}
+	
+	public FileNode OpenDir(String path) {
+		return pathToFileNode(path);
+	}
 
 	public FileNode remove(String path, String dirName) {
 		FileNode fileNode = pathToFileNode(path);
@@ -77,11 +81,14 @@ public class FileHierarchy {
 		}
 		FileNode bigBrother;
 		do {
-			if (fileNode.brother == null)
+			if (fileNode == null){
 				return null;
+			}
+//			if (fileNode.brother == null)
+//				return null;
 			bigBrother = fileNode;
 			fileNode = fileNode.brother;
-		} while (fileNode.fileName != dirName);
+		} while (!fileNode.fileName.equals(dirName));
 		bigBrother.brother = fileNode.brother;
 		fileNode.brother = null;
 		return fileNode;

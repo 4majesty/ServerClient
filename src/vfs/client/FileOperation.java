@@ -2,11 +2,13 @@ package vfs.client;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -49,19 +51,19 @@ public class FileOperation {
 	        System.out.println("response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
-	        	// TODO get json file and parse the file node
-	        	File tfile = new File("/Users/zsy/Documents/workspace/Java/VFSClient/file.json");
-	        	FileInputStream fileIn = new FileInputStream(tfile);
-	        	InputStreamReader inputStreamReader = new InputStreamReader(fileIn, "UTF-8");
-	        	BufferedReader reader = new BufferedReader(inputStreamReader);
-	        	
-	        	String jsonStr = "";
-	        	String tempString = null;
-	        	while((tempString = reader.readLine()) != null){
-	        		jsonStr += tempString;
-	        	}
-	        	reader.close();
+//	        	File tfile = new File("/Users/zsy/Documents/workspace/Java/VFSClient/file.json");
+//	        	FileInputStream fileIn = new FileInputStream(tfile);
+//	        	InputStreamReader inputStreamReader = new InputStreamReader(fileIn, "UTF-8");
+//	        	BufferedReader reader = new BufferedReader(inputStreamReader);
+//	        	
+//	        	String jsonStr = "";
+//	        	String tempString = null;
+//	        	while((tempString = reader.readLine()) != null){
+//	        		jsonStr += tempString;
+//	        	}
+//	        	reader.close();
 	        
+	        	String jsonStr = readJSONString(input);
 	        	JSONObject config = new JSONObject(jsonStr);
 	        	fileHierarchy = new FileHierarchy(config);
 	        }
@@ -69,9 +71,11 @@ public class FileOperation {
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return fileHierarchy;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return fileHierarchy;
 		}
 		
 		return fileHierarchy;
@@ -210,8 +214,12 @@ public class FileOperation {
 			this.writeInt(out, protocolBuf, VSFProtocols.OPEN_FILE);
 			
 			// file location
-			byte[] locationBuf = new byte[256];
-			this.writeString(out, locationBuf, remotePath);
+//			byte[] locationBuf = new byte[256];
+//			this.writeString(out, locationBuf, remotePath);
+			DataOutputStream dataOut = new DataOutputStream(out);
+			byte[] locationBuf = remotePath.getBytes();
+			dataOut.writeInt(locationBuf.length);
+			dataOut.write(locationBuf);
 			
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -219,19 +227,23 @@ public class FileOperation {
 	        System.out.println("response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
-	        	// TODO get json file and parse the filehandle
-	        	String jsonStr = new String();
-	        	JSONObject config = new JSONObject(jsonStr);
+//	        	int objLen = input.readInt();
+//	        	byte[] objBytes = new byte[objLen];
+//	        	this.readBytes(input, objBytes, objLen);
+	        	String JSONStr = readJSONString(input);
+	        	JSONObject jsonObj = new JSONObject(JSONStr);
 	        	
-	        	tempHandle.parseJSON(config);
+	        	tempHandle.parseJSON(jsonObj);
 	        }  
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
 		
 		return tempHandle;
@@ -258,9 +270,11 @@ public class FileOperation {
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 		
 		return false;
@@ -396,9 +410,11 @@ public class FileOperation {
 			byte[] protocolBuf = new byte[8];
 			this.writeInt(out, protocolBuf, VSFProtocols.RESIZE_FILE);
 			
+			DataOutputStream dataOut = new DataOutputStream(out);
 			// file size
-			byte[] sizeBuf = new byte[64];
-			this.writeInt(out, sizeBuf, fileSize);
+//			byte[] sizeBuf = new byte[64];
+//			this.writeInt(out, sizeBuf, fileSize);
+			dataOut.writeInt(fileSize);
 			
 			// file location
 			String fileLocation = handle.fileInfo.remotePath + "/" + handle.fileInfo.fileName;
@@ -434,25 +450,48 @@ public class FileOperation {
 			byte[] protocolBuf = new byte[8];
 			this.writeInt(out, protocolBuf, VSFProtocols.ADD_CHUNK);
 			
+			DataOutputStream dataOut = new DataOutputStream(out);
+			
+			// file location
+			String fileLocation = handle.fileInfo.remotePath + "/" + handle.fileInfo.fileName;
+			
+//			PrintWriter writer = new PrintWriter(out);
+//			writer.println(fileLocation);
+			
+//			byte[] locationBuf = new byte[256]; 
+//			this.writeString(out, locationBuf, fileLocation);
+			
+			byte[] locationBuf = fileLocation.getBytes();
+			dataOut.writeInt(locationBuf.length);
+			dataOut.write(locationBuf);
+			
 			// chunk number
-			byte[] numBuf = new byte[64];
-			this.writeInt(out, numBuf, addNum);
+//			byte[] numBuf = new byte[64];
+//			this.writeInt(out, numBuf, addNum);
+			dataOut.writeInt(addNum);
 			
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
-			String ret = input.readUTF();     
+			String ret = input.readUTF();
 	        System.out.println("response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
-	        	// TODO get json file and parse the filehandle
+//	        	int objLen = input.readInt();
+//	        	byte[] objBytes = new byte[objLen];
+//	        	this.readBytes(input, objBytes, objLen);
+	        	String JSONStr = readJSONString(input);
+	        	JSONObject jsonObj = new JSONObject(JSONStr);
+	        	handle.parseJSON(jsonObj);
 	        }
 
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return handle;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return handle;
 		}
 		
 		return handle;
@@ -632,6 +671,21 @@ public class FileOperation {
 		}
 		buf[strBuf.length] = '\0';
 		out.write(buf, 0, buf.length);
+	}
+	
+	private void readBytes(DataInputStream input, byte[] buf, int len) throws IOException{
+		int b = 0;
+		while(b < len){
+			b += input.read(buf, b, len-b);
+		}
+	}
+	
+	private String readJSONString(DataInputStream input) throws IOException{
+		int objLen = input.readInt();
+    	byte[] objBytes = new byte[objLen];
+    	this.readBytes(input, objBytes, objLen);
+    	
+    	return objBytes.toString();
 	}
 }
 
