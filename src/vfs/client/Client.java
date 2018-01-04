@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -95,8 +96,27 @@ public class Client {
 	}
 	
 	public List<RemoteFileInfo> getRemoteFileInfo(String remotePath){
+		List<RemoteFileInfo> fileInfoList = new LinkedList<RemoteFileInfo>();
 		
-		return null;
+		String path = this.getFileDir(remotePath);
+		String dirName = this.getFileName(remotePath);
+		
+		FileNode fileNode = this.fileHierachy.openFile(path, dirName);
+		if(fileNode.child ==  null){
+			return fileInfoList; 
+		}else{
+			FileNode currNode = fileNode.child;
+			while(currNode != null){
+				RemoteFileInfo currFileInfo = new RemoteFileInfo();
+				currFileInfo.fileName = currNode.fileName;
+				currFileInfo.fileType = currNode.isDir?1:0;
+				currFileInfo.remotePath = path;
+				
+				fileInfoList.add(currFileInfo);
+			}
+		}
+		
+		return fileInfoList;
 	}
 	
 	public float getUploadRate(){

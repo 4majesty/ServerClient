@@ -1,7 +1,11 @@
 package vfs.client;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -46,9 +50,20 @@ public class FileOperation {
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 	        	// TODO get json file and parse the file node
-	        	String jsonStr = new String();
+	        	File tfile = new File("/Users/zsy/Documents/workspace/Java/VFSClient/file.json");
+	        	FileInputStream fileIn = new FileInputStream(tfile);
+	        	InputStreamReader inputStreamReader = new InputStreamReader(fileIn, "UTF-8");
+	        	BufferedReader reader = new BufferedReader(inputStreamReader);
+	        	
+	        	String jsonStr = "";
+	        	String tempString = null;
+	        	while((tempString = reader.readLine()) != null){
+	        		jsonStr += tempString;
+	        	}
+	        	reader.close();
+	        
 	        	JSONObject config = new JSONObject(jsonStr);
-	        	fileHierarchy = new FileHierarchy(config);
+	        	fileHierarchy = new FileHierarchy(config.getJSONObject("file_hierarchy"));
 	        }
 			
 		} catch (UnknownHostException e) {
