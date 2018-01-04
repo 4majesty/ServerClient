@@ -10,6 +10,7 @@ import java.util.List;
 
 import vfs.struct.ChunkInfo;
 import vfs.struct.FileHandle;
+import vfs.struct.FileNode;
 import vfs.struct.RemoteFileInfo;
 import vfs.struct.VSFProtocols;
 
@@ -26,14 +27,101 @@ public class FileOperation {
 		this.masterPort = masterPort;
 	}
 	
-	public boolean mkdir(String dirName){
+	public FileNode getFileNode(){
+		FileNode fileNode = null;
 		
-		return false;
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id 
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.GET_FILE_NODE);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	// TODO get json file and parse the file node
+	        }
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return fileNode;
+	}
+	
+	public boolean mkdir(String dirName){
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.MK_DIR);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	return true;
+	        }else{
+	        	return false;
+	        }
+
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public boolean creat(String remotePath){
-		
-		return false;
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.CREATE_FILE);
+			
+			// remotePath
+			byte[] pathBuf = new byte[256];
+			this.writeString(out, pathBuf, remotePath);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	return true;
+	        }else{
+	        	return false;
+	        }
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public FileHandle open(String remotePath, String mode){
@@ -59,7 +147,66 @@ public class FileOperation {
 		chunkList.add(chunk3);
 		tempHandle.chunkList = chunkList;
 		
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.OPEN_FILE);
+			
+			// file location
+			byte[] locationBuf = new byte[256];
+			this.writeString(out, locationBuf, remotePath);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	// TODO get json file and parse the filehandle
+	        }
+	        
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return tempHandle;
+	}
+	
+	public boolean remove(String remotePath){
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.REMOVE_FILE);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	return true;
+	        }
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 	
 	public int tell(FileHandle handle){
@@ -184,19 +331,84 @@ public class FileOperation {
 	}
 	
 	public FileHandle setFileSize(FileHandle handle , int fileSize){
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.RESIZE_FILE);
+			
+			// file size
+			byte[] sizeBuf = new byte[64];
+			this.writeInt(out, sizeBuf, fileSize);
+			
+			// file location
+			String fileLocation = handle.fileInfo.remotePath + "/" + handle.fileInfo.fileName;
+			byte[] locationBuf = new byte[256];
+			this.writeString(out, locationBuf, fileLocation);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	// TODO get json file and parse the filehandle
+	        }
+
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		
-		return null;
+		return handle;
 	}
 	
 	public FileHandle addChunk(FileHandle handle , int addNum){
-		// TODA ask master for new chunk information.
+		try {
+			Socket socket = new Socket(this.masterIP, this.masterPort);
+			OutputStream out = socket.getOutputStream();
+			
+			// protocol id
+			byte[] protocolBuf = new byte[8];
+			this.writeInt(out, protocolBuf, VSFProtocols.ADD_CHUNK);
+			
+			// chunk number
+			byte[] numBuf = new byte[64];
+			this.writeInt(out, numBuf, addNum);
+			
+			//response from server
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			String ret = input.readUTF();     
+	        System.out.println("response code: " + ret);
+	        
+	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+	        	// TODO get json file and parse the filehandle
+	        }
+
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return handle;
 	}
 	
 	public long getFileSize(FileHandle handle){
+		List<ChunkInfo> chunkList = handle.chunkList;
+		int fileSize = 0;
+		for(int i = 0; i < chunkList.size(); ++i){
+			fileSize += CHUNK_SIZE - chunkList.get(i).chunkLeft;
+		}
 		
-		return 64*1024;
+		return fileSize;
 	}
 	
 	private int writeChunk(ChunkInfo chunkInfo, int startPos, byte[] buf, int writeLen) throws UnknownHostException, IOException{
@@ -353,6 +565,15 @@ public class FileOperation {
 			buf[i] = valBytes[i];
 		}
 		buf[valBytes.length] = '\0';
+		out.write(buf, 0, buf.length);
+	}
+	
+	private void writeString(OutputStream out, byte[] buf, String str) throws IOException{
+		byte[] strBuf = str.getBytes();
+		for(int i = 0; i < strBuf.length; ++i){
+			buf[i] = strBuf[i];
+		}
+		buf[strBuf.length] = '\0';
 		out.write(buf, 0, buf.length);
 	}
 }

@@ -12,11 +12,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import vfs.struct.FileHandle;
+import vfs.struct.FileNode;
 import vfs.struct.RemoteFileInfo;
 
 public class Client {
-	String masterIP;
-	int masterPort;
+	String masterIP = null;
+	int masterPort = 0;
+	FileOperation fileOp = null;
+	FileNode rootFileNode = null;
 	
 	UploadThread currUploadThread = null;
 	DownloadThread currDownloadThread = null;
@@ -24,14 +27,33 @@ public class Client {
 	public Client(String masterIP, int masterPort){
 		this.masterIP = masterIP;
 		this.masterPort = masterPort;
+		
+		this.fileOp = new FileOperation(this.masterIP, this.masterPort);
+		rootFileNode = this.fileOp.getFileNode();
 	}
 	
 	public boolean create(String remotePath, boolean isDir){
+		boolean res = false;
 		
-		return false;
+		if(isDir){
+			res = this.fileOp.mkdir(remotePath);
+		}else{
+			res = this.fileOp.creat(remotePath);
+		}
+		
+		if(rootFileNode == null){
+			rootFileNode = this.fileOp.getFileNode();
+		}
+		
+		return res;
 	}
 	
-	public boolean delete(String remotePath){
+	public boolean delete(String remotePath){		
+		if(this.fileOp.remove(remotePath)){
+			rootFileNode = this.fileOp.getFileNode();
+			return true;
+		}
+		// TODO remove relative FileNode
 		
 		return false;
 	}
@@ -39,6 +61,7 @@ public class Client {
 	public void upload(String localPath, String remotePath){
 		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort);
 		currUploadThread.start();
+		rootFileNode = this.fileOp.getFileNode();
 	}
 	
 	public void download(String localPath, String remotePath){
