@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	<servlet>
+		<servlet-name>FileOpServlet</servlet-name>
+		<servlet-class>vfs.servlet.FileOpServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>UpdateFileListServlet</servlet-name>
+		<servlet-class>vfs.servlet.UpdateFileListServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ListFileServlet</servlet-name>
+		<servlet-class>vfs.servlet.ListFileServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileOpServlet</servlet-name>
+		<url-pattern>/servlet/FileOpServlet</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>UpdateFileListServlet</servlet-name>
+		<url-pattern>/servlet/UpdateFileListServlet</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ListFileServlet</servlet-name>
+		<url-pattern>/servlet/ListFileServlet</url-pattern>
+	</servlet-mapping>
+</web-app>
