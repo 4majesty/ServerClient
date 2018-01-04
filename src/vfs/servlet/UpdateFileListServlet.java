@@ -27,9 +27,24 @@ public class UpdateFileListServlet extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 
 		String parentFilePath = request.getParameter("parent_file_path");
+		String folderDir="";
 
 		System.out.println(parentFilePath);
-
+		String isReturn = request.getParameter("parent_file_path");
+		if(isReturn.equals("1")){
+			String fileRemotePath[] = parentFilePath.split("/");
+			String tmpPath = "";
+			if (fileRemotePath.length > 1) {
+				for (int i = 0; i < fileRemotePath.length - 1; i++) {
+					tmpPath = tmpPath + "/" + fileRemotePath[i];
+				}
+				folderDir = tmpPath;
+			} else {
+				folderDir = fileRemotePath[0];
+			}
+		}
+		parentFilePath = folderDir;
+		
 		Client client = new Client("127.0.0.1", 8807);
 		List<RemoteFileInfo> updateFileList = new ArrayList<>();
 		// updateFileList = client.getRemoteFileInfo(parentFilePath);
@@ -37,7 +52,7 @@ public class UpdateFileListServlet extends HttpServlet {
 		RemoteFileInfo info1 = new RemoteFileInfo();
 		info1.fileName = "subfile";
 		info1.fileType = 1;
-		info1.remotePath = "workspace/subfile";
+		info1.remotePath = "workspace/Client/data/file1/subfile";
 		updateFileList.add(info1);
 
 		HttpSession session = request.getSession();

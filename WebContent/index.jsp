@@ -20,7 +20,7 @@
 	RemoteFileInfo info1 = new RemoteFileInfo();
 	info1.fileName = "file1";
 	info1.fileType = 1;
-	info1.remotePath = "workspace/file1";
+	info1.remotePath = "workspace/Client/data/file1";
 	fileList.add(info1);
 	RemoteFileInfo info2 = new RemoteFileInfo();
 	info2.fileName = "file2";
@@ -45,6 +45,19 @@
 	if (session.getAttribute("fileList") != null) {
 		fileList = (List<RemoteFileInfo>) session.getAttribute("fileList");
 	}
+
+	String fileRemotePath[] = fileList.get(0).remotePath.split("/");
+	String folderDir;
+	String tmpPath = "";
+	if (fileRemotePath.length > 1) {
+		for (int i = 0; i < fileRemotePath.length - 1; i++) {
+			tmpPath = tmpPath + "/" + fileRemotePath[i];
+		}
+		folderDir = tmpPath;
+	} else {
+		folderDir = fileRemotePath[0];
+	}
+	
 	String path = request.getContextPath();
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
@@ -97,7 +110,12 @@
 <script type="text/javascript">
 	function getSubFiles() {
 		var remotePath = document.getElementById("openFileFolder");
-		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+remotePath;
+		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+remotePath+"isReturn=0";
+	}
+</script>
+<script type="text/javascript">
+	function returnParent(parentRemotePath) {
+		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+parentRemotePath+"";
 	}
 </script>
 </head>
@@ -112,12 +130,12 @@
 	</div>
 	<div class="panel-body" style="padding-bottom: 0px;">
 		<div class="panel panel-default">
-			<div class="panel-heading">云传</div>
+			<div class="panel-heading">上传到当前目录: <%=folderDir%></div>
 			<div class="panel-body">
 				<form id="formSearch" class="form-horizontal">
 					<div class="form-group" style="margin-top: 15px">
 						<label class="control-label col-sm-1"
-							for="txt_search_departmentname">上传</label>
+							for="txt_search_departmentname">选择</label>
 						<div class="col-sm-3">
 							<input type="file" class="form-control" id="fileInput">
 						</div>
@@ -136,6 +154,8 @@
 	<table
 		class="table table-hover table-responsive table-striped table-bordered">
 		<caption>文件信息</caption>
+				<button class="btn-download" style="width: 150px;"
+						onclick="returnParent()">返回上级目录</button>
 		<thead>
 			<tr>
 				<th>文件名</th>
@@ -165,7 +185,6 @@
 				<%
 					}
 				%>
-
 				<td><button class="btn-download" style="width: 81px;"
 						onclick="downloadFile(<%=fileNum%>)">
 						<span class="glyphicon glyphicon-save" aria-hidden="true"></span>
