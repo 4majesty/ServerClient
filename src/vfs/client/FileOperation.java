@@ -63,7 +63,7 @@ public class FileOperation {
 	        	reader.close();
 	        
 	        	JSONObject config = new JSONObject(jsonStr);
-	        	fileHierarchy = new FileHierarchy(config.getJSONObject("file_hierarchy"));
+	        	fileHierarchy = new FileHierarchy(config);
 	        }
 			
 		} catch (UnknownHostException e) {
