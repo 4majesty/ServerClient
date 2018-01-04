@@ -15,6 +15,7 @@ public class FileNode {
 	public FileNode brother;
 	public ArrayList<Integer> chunkIDList;
 
+	// Note: only use it in parsing JSON
 	public FileNode() {
 	}
 
@@ -22,6 +23,15 @@ public class FileNode {
 		this.fileName = fileName;
 		this.isDir = isDir;
 		this.parent = parent;
+		this.chunkIDList = new ArrayList<Integer>();
+	}
+	
+	public int getChunkSize() {
+		return chunkIDList.size();
+	}
+
+	public void addChunk(int chunkID) {
+		chunkIDList.add(chunkID);
 	}
 
 	public FileNode findChildWithName(String name) {
