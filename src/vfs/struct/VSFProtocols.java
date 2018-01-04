@@ -21,5 +21,5 @@ public class VSFProtocols {
 	
 	
 	public static String MESSAGE_OK = "OK";
-
+	public static String MASTER_REJECT = "FAIL";
 }
