@@ -28,13 +28,18 @@ public class FileHierarchy {
 		if (!fileNode.isDir)
 			return false;
 		FileNode parent = fileNode;
+		if (fileNode.child == null){
+			parent.child = new FileNode(dirName, true, parent);
+			return true;
+		}
+		
 		fileNode = fileNode.child;
-		while (fileNode != null) {
+		while (fileNode.brother != null) {
 			if (fileNode.fileName.equals(dirName))
 				return false;
 			fileNode = fileNode.brother;
 		}
-		fileNode = new FileNode(dirName, true, parent);
+		fileNode.brother = new FileNode(dirName, true, parent);
 		return true;
 	}
 

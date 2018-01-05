@@ -47,14 +47,8 @@ public class Client {
 		String dirName = this.getFileName(remotePath);
 		if(isDir){
 			res = this.fileOp.mkdir(remotePath);
-			if(res){
-				this.fileHierachy.mkdir(path, dirName);
-			}
 		}else{
 			res = this.fileOp.creat(remotePath);
-			if(res){
-				this.fileHierachy.openFile(path, dirName);
-			}
 		}
 		
 		if(res){
@@ -76,9 +70,10 @@ public class Client {
 			this.fileHierachy = this.fileOp.getFileHierarchy();
 		}
 		
-		if(this.fileOp.remove(remotePath)){
-			this.fileHierachy.remove(path, dirName);
-		}
+//		if(this.fileOp.remove(remotePath)){
+//			this.fileHierachy.remove(path, dirName);
+//		}
+		this.fileHierachy.remove(path, dirName);
 		
 		return false;
 	}
@@ -265,10 +260,12 @@ public class Client {
 //        System.out.println(list);
 //        
 //        System.out.println('\0');
-    	Client client = new Client("127.0.0.1", 8877);
+    	Client client = new Client("localhost", 8877);
     	
-    	client.getRemoteFileInfo("vfs");
+    	client.create("vfs/zsy", true);
     	client.delete("vfs/b");
+//    	client.getRemoteFileInfo("vfs");
+//    	client.delete("vfs/b");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc2.txt");
     	

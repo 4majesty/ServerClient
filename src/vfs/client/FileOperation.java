@@ -115,7 +115,7 @@ public class FileOperation {
 //		return fileNode;
 //	}
 	
-	public boolean mkdir(String dirName){
+	public boolean mkdir(String remoteDir){
 		try {
 			Socket socket = new Socket(this.masterIP, this.masterPort);
 			OutputStream out = socket.getOutputStream();
@@ -123,6 +123,14 @@ public class FileOperation {
 			// protocol id
 			byte[] protocolBuf = new byte[8];
 			this.writeInt(out, protocolBuf, VSFProtocols.MK_DIR);
+			
+			// file location
+//			byte[] locationBuf = new byte[256];
+//			this.writeString(out, locationBuf, remotePath);
+			DataOutputStream dataOut = new DataOutputStream(out);
+			byte[] locationBuf = remoteDir.getBytes();
+			dataOut.writeInt(locationBuf.length);
+			dataOut.write(locationBuf);
 			
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -155,9 +163,17 @@ public class FileOperation {
 			byte[] protocolBuf = new byte[8];
 			this.writeInt(out, protocolBuf, VSFProtocols.CREATE_FILE);
 			
-			// remotePath
-			byte[] pathBuf = new byte[256];
-			this.writeString(out, pathBuf, remotePath);
+//			// remotePath
+//			byte[] pathBuf = new byte[256];
+//			this.writeString(out, pathBuf, remotePath);
+			
+			// file location
+//			byte[] locationBuf = new byte[256];
+//			this.writeString(out, locationBuf, remotePath);
+			DataOutputStream dataOut = new DataOutputStream(out);
+			byte[] locationBuf = remotePath.getBytes();
+			dataOut.writeInt(locationBuf.length);
+			dataOut.write(locationBuf);
 			
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -257,6 +273,14 @@ public class FileOperation {
 			// protocol id
 			byte[] protocolBuf = new byte[8];
 			this.writeInt(out, protocolBuf, VSFProtocols.REMOVE_FILE);
+			
+			// file location
+//			byte[] locationBuf = new byte[256];
+//			this.writeString(out, locationBuf, remotePath);
+			DataOutputStream dataOut = new DataOutputStream(out);
+			byte[] locationBuf = remotePath.getBytes();
+			dataOut.writeInt(locationBuf.length);
+			dataOut.write(locationBuf);
 			
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -685,7 +709,7 @@ public class FileOperation {
     	byte[] objBytes = new byte[objLen];
     	this.readBytes(input, objBytes, objLen);
     	
-    	return objBytes.toString();
+    	return new String(objBytes);
 	}
 }
 
