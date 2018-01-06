@@ -14,7 +14,9 @@ public class FileHandle {
 	public RemoteFileInfo fileInfo;
 	
 	public FileHandle(int mode){
+		this.offset = 0;
 		this.mode = mode;
+		fileInfo = new RemoteFileInfo();
 	}
 	
 	public List<ChunkInfo> chunkList = new LinkedList<ChunkInfo>();
@@ -30,7 +32,7 @@ public class FileHandle {
 	}
 	
 	public int getMaxChunkIndex(){
-		int maxIndex = 0;
+		int maxIndex = -1;
 		for(int i = 0;i < chunkList.size(); ++i){
 			if(maxIndex < chunkList.get(i).fileIndex){
 				maxIndex = chunkList.get(i).fileIndex;
@@ -52,6 +54,7 @@ public class FileHandle {
 		for(int i = 0; i < chunkArry.length(); ++i){
 			ChunkInfo currChunk = new ChunkInfo();
 			currChunk.parseJSON(chunkArry.getJSONObject(i));
+			this.chunkList.add(currChunk);
 		}
 	}
 }
