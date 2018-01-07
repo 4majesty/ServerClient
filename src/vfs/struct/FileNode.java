@@ -25,13 +25,20 @@ public class FileNode {
 		this.parent = parent;
 		this.chunkIDList = new ArrayList<Integer>();
 	}
-	
+
 	public int getChunkSize() {
 		return chunkIDList.size();
 	}
 
 	public void addChunk(int chunkID) {
 		chunkIDList.add(chunkID);
+	}
+
+	public void removeChunk(int chunkID) {
+		for (int i = 0; i < chunkIDList.size(); i++) {
+			if (chunkIDList.get(i) == chunkID)
+				chunkIDList.remove(i);
+		}
 	}
 
 	public FileNode findChildWithName(String name) {
