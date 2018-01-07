@@ -8,6 +8,8 @@
 <%@page import="vfs.struct.RemoteFileInfo"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="java.util.Map"%>
 <%
 	Client client = new Client("127.0.0.1", 8877);
 
@@ -41,6 +43,15 @@
 	fileList.add(info3);
 	fileList.add(info3);
 	fileList.add(info3); */
+
+	Map<String, Client> downloadClients = new HashMap<>();
+	Map<String, Client> uploadClients = new HashMap<>();
+	if (session.getAttribute("downloads") != null) {
+		downloadClients = (Map<String, Client>) session.getAttribute("downloads");
+	}
+	if (session.getAttribute("uploads") != null) {
+		uploadClients = (Map<String, Client>) session.getAttribute("uploads");
+	}
 
 	String folderDir;
 	if (!fileList.isEmpty()) {
@@ -131,6 +142,23 @@
 		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+parentRemotePath+"";
 	}
 </script>
+<script type="text/javascript">
+	function createDir() {
+		var dirName = document.getElementById("text").text();
+		var opType = "create";
+		var folderName = <%=folderDir%>;
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+dirName+"&operation_type="+opType;	}
+</script>
+<script type="text/javascript">
+	function getDownloads() {
+		var opType = "getDownloads";
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+"&operation_type="+opType;	}
+</script>
+<script type="text/javascript">
+	function getUploads() {
+		var opType = "getUploads";
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+"&operation_type="+opType;	}
+</script>
 </head>
 <body>
 	<div id="toolbar" class="btn-group">
@@ -158,15 +186,21 @@
 						<thead>
 							<tr>
 								<th>文件名</th>
-								<th>文件类型</th>
-								<th>下载</th>
+								<th>下载状态</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-								<td></td>
-								<td></td>
-								<td></td>
+								<%
+									for (Map.Entry<String, Client> entry : uploadClients.entrySet()) {
+										Client c = entry.getValue();
+										float rate = c.getDownloadRate();
+								%>
+								<td><%=entry.getKey()%></td>
+								<td><%=rate%></td>
+								<%
+									}
+								%>
 							</tr>
 						</tbody>
 					</table>
@@ -190,15 +224,21 @@
 						<thead>
 							<tr>
 								<th>文件名</th>
-								<th>文件类型</th>
-								<th>下载</th>
+								<th>下载状态</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-								<td></td>
-								<td></td>
-								<td></td>
+								<%
+									for (Map.Entry<String, Client> entry : downloadClients.entrySet()) {
+										Client c = entry.getValue();
+										float rate = c.getDownloadRate();
+								%>
+								<td><%=entry.getKey()%></td>
+								<td><%=rate%></td>
+								<%
+									}
+								%>
 							</tr>
 						</tbody>
 					</table>
@@ -232,11 +272,32 @@
 			</div>
 		</div>
 	</div>
+	<button class="btn-download" style="width: 150px;"
+		onclick="returnParent()">返回上级目录</button>
+	<button id="btn_edit" type="button" class="btn-download"
+		style="width: 150px;" data-toggle="modal" data-target="#createModel">创建新目录</button>
+	<div class="modal fade" id="createModel" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<label class="control-label">请输入目录名：</label> <input type="text"
+						class="form-control" id="dir-name">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary" onclick="createDir()">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	<table
 		class="table table-hover table-responsive table-striped table-bordered">
 		<caption>文件信息</caption>
-		<button class="btn-download" style="width: 150px;"
-			onclick="returnParent()">返回上级目录</button>
 		<thead>
 			<tr>
 				<th>文件名</th>
