@@ -14,6 +14,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import vfs.struct.ChunkInfo;
@@ -155,71 +156,58 @@ public class FileOperation {
 	}
 	
 	public boolean creat(String remotePath){
-		try {
-			Socket socket = new Socket(this.masterIP, this.masterPort);
-			OutputStream out = socket.getOutputStream();
-			
-			// protocol id
-			byte[] protocolBuf = new byte[8];
-			this.writeInt(out, protocolBuf, VSFProtocols.CREATE_FILE);
-			
-//			// remotePath
-//			byte[] pathBuf = new byte[256];
-//			this.writeString(out, pathBuf, remotePath);
-			
-			// file location
-//			byte[] locationBuf = new byte[256];
-//			this.writeString(out, locationBuf, remotePath);
-			DataOutputStream dataOut = new DataOutputStream(out);
-			byte[] locationBuf = remotePath.getBytes();
-			dataOut.writeInt(locationBuf.length);
-			dataOut.write(locationBuf);
-			
-			//response from server
-			DataInputStream input = new DataInputStream(socket.getInputStream());
-			String ret = input.readUTF();     
-	        System.out.println("response code: " + ret);
-	        
-	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
-	        	return true;
-	        }else{
-	        	return false;
-	        }
-			
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		FileHandle handle = this.open(remotePath, "w+");
+		if (handle == null){
 			return false;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
+		}else{
+			return true;
 		}
+//		try {
+//			Socket socket = new Socket(this.masterIP, this.masterPort);
+//			OutputStream out = socket.getOutputStream();
+//			
+//			// protocol id
+//			byte[] protocolBuf = new byte[8];
+//			this.writeInt(out, protocolBuf, VSFProtocols.CREATE_FILE);
+//			
+////			// remotePath
+////			byte[] pathBuf = new byte[256];
+////			this.writeString(out, pathBuf, remotePath);
+//			
+//			// file location
+////			byte[] locationBuf = new byte[256];
+////			this.writeString(out, locationBuf, remotePath);
+//			DataOutputStream dataOut = new DataOutputStream(out);
+//			byte[] locationBuf = remotePath.getBytes();
+//			dataOut.writeInt(locationBuf.length);
+//			dataOut.write(locationBuf);
+//			
+//			//response from server
+//			DataInputStream input = new DataInputStream(socket.getInputStream());
+//			String ret = input.readUTF();     
+//	        System.out.println("response code: " + ret);
+//	        
+//	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
+//	        	return true;
+//	        }else{
+//	        	return false;
+//	        }
+//			
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return false;
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return false;
+//		}
+			
 	}
 	
 	public FileHandle open(String remotePath, String mode){
 		// TODO file privilege
 		FileHandle tempHandle = new FileHandle(2); // 2 for r&w
-//		tempHandle.handle = 0;
-//		tempHandle.offset = 0;
-//		tempHandle.mode = 2;
-//		
-//		RemoteFileInfo fileInfo = new RemoteFileInfo();
-//		fileInfo.remotePath = remotePath;
-//		fileInfo.fileName = remotePath;
-//		fileInfo.fileType = 0;
-//		tempHandle.fileInfo = fileInfo;
-//		
-//		ChunkInfo chunk0 = new ChunkInfo(1001, "127.0.0.1", 8877, 0, -1);
-//		ChunkInfo chunk1 = new ChunkInfo(1002, "127.0.0.1", 8877, 1, -1);
-//		ChunkInfo chunk2 = new ChunkInfo(1003, "127.0.0.1", 8877, 2, -1);
-//		ChunkInfo chunk3 = new ChunkInfo(1003, "127.0.0.1", 8877, 3, -1);
-//		List<ChunkInfo> chunkList = new LinkedList<ChunkInfo>();
-//		chunkList.add(chunk0);
-//		chunkList.add(chunk1);
-//		chunkList.add(chunk2);
-//		chunkList.add(chunk3);
-//		tempHandle.chunkList = chunkList;
 		
 		try {
 			Socket socket = new Socket(this.masterIP, this.masterPort);
@@ -250,7 +238,9 @@ public class FileOperation {
 	        	JSONObject jsonObj = new JSONObject(JSONStr);
 	        	
 	        	tempHandle.parseJSON(jsonObj);
-	        }  
+	        }else{
+	        	return null;
+	        }
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -325,8 +315,13 @@ public class FileOperation {
 			chunkNum = 1 + (int) Math.ceil((nbyteLeft - (CHUNK_SIZE - firstChunkOffset))/CHUNK_SIZE);
 		}
 		
-		if(handle.getMaxChunkIndex() < chunkNum){
-			handle = this.addChunk(handle, chunkNum - handle.getMaxChunkIndex());
+		System.out.println("handle.getMaxChunkIndex(): " + handle.getMaxChunkIndex());
+		int maxChunIndx = handle.getMaxChunkIndex();
+		if(maxChunIndx < firstChunkIndex + chunkNum - 1){
+			handle = this.addChunk(handle, firstChunkIndex + chunkNum - 1 - maxChunIndx);
+			if(handle == null){
+				return -1;
+			}
 		}
 		
 		byte[] chunkBuf = new byte[CHUNK_SIZE];
@@ -400,7 +395,7 @@ public class FileOperation {
 			int readLen = Math.min(nbyteLeft, CHUNK_SIZE);
 
 			try {
-				if(readByteCount == 0){
+				if(readChunkCount == 0){
 					readByteNum = readChunk(currentChunk, firstChunkOffset, chunkBuf, readLen);
 				}else{
 					readByteNum = readChunk(currentChunk, 0, chunkBuf, readLen);
@@ -504,8 +499,16 @@ public class FileOperation {
 //	        	byte[] objBytes = new byte[objLen];
 //	        	this.readBytes(input, objBytes, objLen);
 	        	String JSONStr = readJSONString(input);
-	        	JSONObject jsonObj = new JSONObject(JSONStr);
-	        	handle.parseJSON(jsonObj);
+	        	JSONArray jsonArr = new JSONArray(JSONStr);
+	        	handle.chunkList = new LinkedList<ChunkInfo>();
+	        	for(int i = 0; i < jsonArr.length(); ++i){
+	        		ChunkInfo curr = new ChunkInfo();
+	        		curr.parseJSON(jsonArr.getJSONObject(i));
+	        		handle.chunkList.add(curr);
+	        	}
+	        }else{
+	        	System.out.println("fail to addchunk, error code: " + ret);
+	        	handle = null;
 	        }
 
 		} catch (UnknownHostException e) {
@@ -551,36 +554,42 @@ public class FileOperation {
 		out.write(protocolBuff, 0, protocolBuff.length);
 		System.out.println("protocol id: " + protocolBuff);
 		
+		
+		DataOutputStream dataOut = new DataOutputStream(out);
 		// chunk_id
-		byte[] sizeBuff = new byte[64];
-		byte[] sizeBytes = (Integer.toString(chunkInfo.chunkId)).getBytes();
-		for(int i = 0; i < sizeBytes.length;++i){
-			sizeBuff[i] = sizeBytes[i];
-        }
-		sizeBuff[sizeBytes.length] = '\0';
-		out.write(sizeBuff, 0, sizeBuff.length);
-		System.out.println("chunk_id: " + sizeBuff);
+		dataOut.writeInt(chunkInfo.chunkId);
+		
+//		byte[] sizeBuff = new byte[64];
+//		byte[] sizeBytes = (Integer.toString(chunkInfo.chunkId)).getBytes();
+//		for(int i = 0; i < sizeBytes.length;++i){
+//			sizeBuff[i] = sizeBytes[i];
+//        }
+//		sizeBuff[sizeBytes.length] = '\0';
+//		out.write(sizeBuff, 0, sizeBuff.length);
+//		System.out.println("chunk_id: " + sizeBuff);
 		
 		//offset
-		byte[] offsetBuff = new byte[64];
-		byte[] offsetBytes = Integer.toString(startPos).getBytes();
-		for(int i = 0; i < offsetBytes.length; ++i){
-			offsetBuff[i] = offsetBytes[i];
-		}
-		offsetBuff[offsetBytes.length] = '\0';
-		out.write(offsetBuff, 0, offsetBuff.length);
-		System.out.println("offset: " + offsetBuff);
+		dataOut.writeInt(startPos);
+//		byte[] offsetBuff = new byte[64];
+//		byte[] offsetBytes = Integer.toString(startPos).getBytes();
+//		for(int i = 0; i < offsetBytes.length; ++i){
+//			offsetBuff[i] = offsetBytes[i];
+//		}
+//		offsetBuff[offsetBytes.length] = '\0';
+//		out.write(offsetBuff, 0, offsetBuff.length);
+//		System.out.println("offset: " + offsetBuff);
 		
 		//writting len
-		byte[] lenBuff = new byte[64];
-		byte[] lenBytes = (Integer.toString(writeLen)).getBytes();
-		for(int i = 0; i < lenBytes.length;++i){
-			lenBuff[i] = lenBytes[i];
-        }
-		lenBuff[lenBytes.length] = '\0';
-		out.write(lenBuff, 0, lenBuff.length);
-		System.out.println("writing len: " + lenBuff);
-		out.flush();
+		dataOut.writeInt(writeLen);
+//		byte[] lenBuff = new byte[64];
+//		byte[] lenBytes = (Integer.toString(writeLen)).getBytes();
+//		for(int i = 0; i < lenBytes.length;++i){
+//			lenBuff[i] = lenBytes[i];
+//        }
+//		lenBuff[lenBytes.length] = '\0';
+//		out.write(lenBuff, 0, lenBuff.length);
+//		System.out.println("writing len: " + lenBuff);
+//		out.flush();
 		
 		//content
 		int bufferSize = FileOperation.UPLOAD_BUFFER_SIZE;
@@ -630,17 +639,22 @@ public class FileOperation {
 		// protocol id
 		byte[] protocolBuf = new byte[8];
 		this.writeInt(out, protocolBuf, VSFProtocols.READ_CHUNK);
-		// chunk_id
-		byte[] chunkBuf = new byte[64];
-		this.writeInt(out, chunkBuf, chunkInfo.chunkId);
-		// offset
-		byte[] offsetBuf = new byte[64];
-		this.writeInt(out, offsetBuf, startPos);
-		// read len
-		byte[] lenBuf = new byte[64];
-		this.writeInt(out, lenBuf, readLen);
 		
-		out.flush();
+		DataOutputStream dataOut = new DataOutputStream(out);
+		// chunk_id
+		dataOut.writeInt(chunkInfo.chunkId);
+//		byte[] chunkBuf = new byte[64];
+//		this.writeInt(out, chunkBuf, chunkInfo.chunkId);
+		// offset
+		dataOut.writeInt(startPos);
+//		byte[] offsetBuf = new byte[64];
+//		this.writeInt(out, offsetBuf, startPos);
+		// read len
+		dataOut.writeInt(readLen);
+//		byte[] lenBuf = new byte[64];
+//		this.writeInt(out, lenBuf, readLen);
+//		
+//		out.flush();
 		
 		//content from server
 		DataInputStream input = new DataInputStream(socket.getInputStream());

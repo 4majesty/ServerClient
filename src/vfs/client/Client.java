@@ -154,6 +154,10 @@ public class Client {
 		
 		public void run(){
 			File filein = new File(this.localPath);
+			if(!filein.exists()){
+				System.out.println("no path: " + localPath + " on the computer!");
+				return;
+			}
 			long fileSize = filein.length();
 			FileInputStream localFis = null;
 			try {
@@ -260,16 +264,19 @@ public class Client {
 //        System.out.println(list);
 //        
 //        System.out.println('\0');
-    	Client client = new Client("localhost", 8877);
+    	String ipAddr = "localhost";
     	
-    	client.create("vfs/zsy", true);
-    	client.delete("vfs/b");
+    	Client client = new Client(ipAddr, 8877);
+    	
+//    	client.create("vfs/zsy", true);
+////    	client.delete("vfs/b");
 //    	client.getRemoteFileInfo("vfs");
 //    	client.delete("vfs/b");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc2.txt");
     	
-//    	client.download("/Users/zsy/Documents/workspace/Java/download.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
+//    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "vfs/b");
+    	client.download("/Users/zsy/Documents/workspace/Java/download.txt", "vfs/b");
     }
 	
 }

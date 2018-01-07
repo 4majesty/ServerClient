@@ -43,6 +43,9 @@ public class FileNode {
 
 	public FileNode findChildWithName(String name) {
 		FileNode f = child;
+		if(f == null){
+			return null;
+		}
 		while (true) {
 			if (f.fileName.equals(name)) {
 				return f;

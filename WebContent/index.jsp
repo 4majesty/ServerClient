@@ -12,11 +12,11 @@
 	Client client = new Client("127.0.0.1", 8807);
 
 	List<RemoteFileInfo> fileList = new ArrayList<RemoteFileInfo>();
-	/* 	if (request.getParameter("fileList") != null) {
+	/* if (request.getParameter("fileList") != null) {
 				fileList = (List<RemoteFileInfo>) request.getAttribute("fileList");
 			} else {
-				fileList = client.getRemoteFileInfo();
-			}  */
+				fileList = client.getRemoteFileInfo("vfs");
+			} */
 	RemoteFileInfo info1 = new RemoteFileInfo();
 	info1.fileName = "file1";
 	info1.fileType = 1;
@@ -57,7 +57,7 @@
 	} else {
 		folderDir = fileRemotePath[0];
 	}
-	
+
 	String path = request.getContextPath();
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
@@ -121,16 +121,84 @@
 </head>
 <body>
 	<div id="toolbar" class="btn-group">
-		<button id="btn_add" type="button" class="btn btn-default">
-			<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>上传文件
+		<button id="btn_add" type="button" class="btn btn-primary btn-lg"
+			data-toggle="modal" data-target="#uploadModel">
+			<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>上传进度
 		</button>
-		<button id="btn_edit" type="button" class="btn btn-default">
-			<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>下载
+		<button id="btn_edit" type="button" class="btn btn-primary btn-lg"
+			data-toggle="modal" data-target="#downloadModel">
+			<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>下载进度
 		</button>
+	</div>
+	<div class="modal fade" id="uploadModel" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">正在上传...</h4>
+				</div>
+				<div class="modal-body">
+					<table
+						class="table table-hover table-responsive table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>文件名</th>
+								<th>文件类型</th>
+								<th>下载</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- /.modal -->
+	</div>
+	<div class="modal fade" id="downloadModel" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">正在下载...</h4>
+				</div>
+				<div class="modal-body">
+					<table
+						class="table table-hover table-responsive table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>文件名</th>
+								<th>文件类型</th>
+								<th>下载</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- /.modal -->
 	</div>
 	<div class="panel-body" style="padding-bottom: 0px;">
 		<div class="panel panel-default">
-			<div class="panel-heading">上传到当前目录: <%=folderDir%></div>
+			<div class="panel-heading">
+				上传到当前目录:
+				<%=folderDir%></div>
 			<div class="panel-body">
 				<form id="formSearch" class="form-horizontal">
 					<div class="form-group" style="margin-top: 15px">
@@ -154,8 +222,8 @@
 	<table
 		class="table table-hover table-responsive table-striped table-bordered">
 		<caption>文件信息</caption>
-				<button class="btn-download" style="width: 150px;"
-						onclick="returnParent()">返回上级目录</button>
+		<button class="btn-download" style="width: 150px;"
+			onclick="returnParent()">返回上级目录</button>
 		<thead>
 			<tr>
 				<th>文件名</th>
