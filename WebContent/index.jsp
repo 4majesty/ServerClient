@@ -4,20 +4,21 @@
 <%@page import="vfs.servlet.FileOpServlet"%>
 <%@page import="vfs.servlet.UpdateFileListServlet"%>
 <%@page import="vfs.servlet.ListFileServlet"%>
-<%@page import="vfs.client.Client"%>
+<%@page import="vfs.client.ClientInterface"%>
 <%@page import="vfs.struct.RemoteFileInfo"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="java.util.Map"%>
 <%
-	Client client = new Client("127.0.0.1", 8877);
-
 	List<RemoteFileInfo> fileList = new ArrayList<RemoteFileInfo>();
 	if (session.getAttribute("fileList") != null) {
 		fileList = (List<RemoteFileInfo>) session.getAttribute("fileList");
 	} else {
-		fileList = client.getRemoteFileInfo("vfs");
+		fileList = ClientInterface.client.getRemoteFileInfo("vfs");
+		if(!fileList.isEmpty()){
+			System.out.println(fileList.get(0).fileName);
+		}
 	}
 	/* RemoteFileInfo info1 = new RemoteFileInfo();
 	info1.fileName = "file1";
@@ -44,14 +45,14 @@
 	fileList.add(info3);
 	fileList.add(info3); */
 
-	Map<String, Client> downloadClients = new HashMap<>();
+/* 	Map<String, Client> downloadClients = new HashMap<>();
 	Map<String, Client> uploadClients = new HashMap<>();
 	if (session.getAttribute("downloads") != null) {
 		downloadClients = (Map<String, Client>) session.getAttribute("downloads");
 	}
 	if (session.getAttribute("uploads") != null) {
 		uploadClients = (Map<String, Client>) session.getAttribute("uploads");
-	}
+	} */
 
 	String folderDir;
 	if (!fileList.isEmpty()) {
@@ -66,8 +67,8 @@
 			folderDir = fileRemotePath[0];
 		}
 	} else {
-		if (request.getAttribute("dir") != null) {
-			folderDir = request.getAttribute("dir").toString();
+		if (request.getParameter("dir") != null) {
+			folderDir = request.getParameter("dir").toString();
 		} else {
 			folderDir = "vfs";
 		}
@@ -109,7 +110,7 @@
 <link href="${path}css/bootstrap-table.css" rel="stylesheet" />
 <script type="text/javascript">
 	function getInputURL() {
-		alert('uploading ...');
+		//alert('uploading ...');
  		//var myselect = document.getElementById("fileInput");
  		var select = $("#fileInput").val();
 		var selectPath = select.split("\\");
@@ -132,24 +133,37 @@
 	}
 </script>
 <script type="text/javascript">
-	function getSubFiles() {
-		var remotePath = document.getElementById("openFileFolder");
-		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+remotePath+"isReturn=0";
+	function deleteFile(num) {
+		var downloadPath = $("#"+num).text();
+		var folderName = "<%=folderDir%>";
+		var opType = "delete";
+		//alert(folderName+"/"+downloadPath);
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+downloadPath+"&operation_type="+opType;
 	}
 </script>
 <script type="text/javascript">
-	function returnParent(parentRemotePath) {
-		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+parentRemotePath+"";
+	function getSubFiles(num) {
+		var remotePath = $("#"+num).text();
+		var folderName = "<%=folderDir%>";
+		//alert(remotePath);
+		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+folderName+"/"+remotePath+"&isReturn=0";
+	}
+</script>
+<script type="text/javascript">
+	function returnParent() {
+		var folderName = "<%=folderDir%>";
+		window.location.href = "${path}servlet/UpdateFileListServlet?parent_file_path="+folderName+"&isReturn=1";
 	}
 </script>
 <script type="text/javascript">
 	function createDir() {
-		var dirName = document.getElementById("text").text();
+		var dirName = document.getElementById("dir-name").value;
 		var opType = "create";
-		var folderName = <%=folderDir%>;
+		var folderName = "<%=folderDir%>";
+		//alert(folderName+"/"+dirName);
 		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+dirName+"&operation_type="+opType;	}
 </script>
-<script type="text/javascript">
+<!-- <script type="text/javascript">
 	function getDownloads() {
 		var opType = "getDownloads";
 		window.location.href = "${path}servlet/FileOpServlet?file_path="+"&operation_type="+opType;	}
@@ -157,8 +171,9 @@
 <script type="text/javascript">
 	function getUploads() {
 		var opType = "getUploads";
+		alert("gettingUploads...");
 		window.location.href = "${path}servlet/FileOpServlet?file_path="+"&operation_type="+opType;	}
-</script>
+</script> -->
 </head>
 <body>
 	<div id="toolbar" class="btn-group">
@@ -192,14 +207,14 @@
 						<tbody>
 							<tr>
 								<%
-									for (Map.Entry<String, Client> entry : uploadClients.entrySet()) {
+									/* for (Map.Entry<String, Client> entry : uploadClients.entrySet()) {
 										Client c = entry.getValue();
-										float rate = c.getDownloadRate();
+										float rate = c.getDownloadRate(); */
 								%>
-								<td><%=entry.getKey()%></td>
-								<td><%=rate%></td>
+								<td><%-- <%=entry.getKey()%> --%></td>
+								<td><%-- <%=rate%> --%></td>
 								<%
-									}
+									/* } */
 								%>
 							</tr>
 						</tbody>
@@ -230,14 +245,14 @@
 						<tbody>
 							<tr>
 								<%
-									for (Map.Entry<String, Client> entry : downloadClients.entrySet()) {
+									/* for (Map.Entry<String, Client> entry : downloadClients.entrySet()) {
 										Client c = entry.getValue();
-										float rate = c.getDownloadRate();
+										float rate = c.getDownloadRate(); */
 								%>
-								<td><%=entry.getKey()%></td>
-								<td><%=rate%></td>
+								<td><%-- <%=entry.getKey()%> --%></td>
+								<td><%-- <%=rate%> --%></td>
 								<%
-									}
+									/* } */
 								%>
 							</tr>
 						</tbody>
@@ -302,7 +317,7 @@
 			<tr>
 				<th>文件名</th>
 				<th>文件类型</th>
-				<th>下载</th>
+				<th>操作</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -318,8 +333,8 @@
 				<%
 					} else if (fileList.get(fileNum).fileType == 1) {
 				%>
-				<td id=<%=fileNum%>><a id="openFileFolder"
-					href="javascript:void(0);" onclick="getSubFiles()"><%=fileList.get(fileNum).fileName%></a></td>
+				<td id=<%=fileNum%>><a
+					href="javascript:void(0);" onclick="getSubFiles(<%=fileNum%>)"><%=fileList.get(fileNum).fileName%></a></td>
 
 				<td><span class="glyphicon glyphicon-folder-close"
 					aria-hidden="true"></span></td>
@@ -327,9 +342,13 @@
 				<%
 					}
 				%>
-				<td><button class="btn-download" style="width: 81px;"
+				<td><button class="btn-download" style="width: 50px;"
 						onclick="downloadFile(<%=fileNum%>)">
 						<span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+					</button>
+					<button class="btn-download" style="width: 50px;"
+						onclick="deleteFile(<%=fileNum%>)">
+						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 					</button></td>
 			</tr>
 			<%

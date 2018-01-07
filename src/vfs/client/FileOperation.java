@@ -49,7 +49,7 @@ public class FileOperation {
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			String ret = input.readUTF();     
-	        System.out.println("response code: " + ret);
+	        System.out.println("getFileHierarchy response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 //	        	File tfile = new File("/Users/zsy/Documents/workspace/Java/VFSClient/file.json");
@@ -136,7 +136,7 @@ public class FileOperation {
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			String ret = input.readUTF();     
-	        System.out.println("response code: " + ret);
+	        System.out.println("mkdir response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 	        	return true;
@@ -228,7 +228,7 @@ public class FileOperation {
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			String ret = input.readUTF();     
-	        System.out.println("response code: " + ret);
+	        System.out.println("open response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 //	        	int objLen = input.readInt();
@@ -275,7 +275,7 @@ public class FileOperation {
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			String ret = input.readUTF();     
-	        System.out.println("response code: " + ret);
+	        System.out.println("remove response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 	        	return true;
@@ -443,7 +443,7 @@ public class FileOperation {
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			String ret = input.readUTF();     
-	        System.out.println("response code: " + ret);
+	        System.out.println("file resize response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 	        	// TODO get json file and parse the filehandle
@@ -492,7 +492,7 @@ public class FileOperation {
 			//response from server
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			String ret = input.readUTF();
-	        System.out.println("response code: " + ret);
+	        System.out.println("add chunk response code: " + ret);
 	        
 	        if (VSFProtocols.MESSAGE_OK.equals(ret)){
 //	        	int objLen = input.readInt();
@@ -609,7 +609,7 @@ public class FileOperation {
 		DataInputStream input = new DataInputStream(socket.getInputStream());
 		System.out.println("wait response"); 
 		String ret = input.readUTF();     
-        System.out.println("response code: " + ret);    
+        System.out.println("write chunk response code: " + ret);    
         // 如接收到 "OK" 则断开连接    
         if ("OK".equals(ret)) {    
             System.out.println("client close");    
@@ -659,7 +659,7 @@ public class FileOperation {
 		//content from server
 		DataInputStream input = new DataInputStream(socket.getInputStream());
 		String ret = input.readUTF();     
-        System.out.println("socket, port: " + socket.getPort() + "response code: " + ret);    
+        System.out.println("socket, port: " + socket.getPort() + "readChunk response code: " + ret);    
 
         int currBufCount = 0;
         if ("OK".equals(ret)) {    

@@ -70,16 +70,19 @@ public class Client {
 			this.fileHierachy = this.fileOp.getFileHierarchy();
 		}
 		
-//		if(this.fileOp.remove(remotePath)){
-//			this.fileHierachy.remove(path, dirName);
-//		}
 		this.fileHierachy.remove(path, dirName);
+		this.fileOp.remove(remotePath);
+//		this.fileHierachy.remove(path, dirName);
 		
 		return false;
 	}
 	
 	public void upload(String localPath, String remotePath){
-		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort, this);
+		String path = this.getFileDir(remotePath);
+		String name = this.getFileName(remotePath);
+		this.fileHierachy.openFile(path, name);
+		
+		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort);
 		currUploadThread.start();
 //		rootFileNode = this.fileOp.getFileNode();
 
@@ -140,17 +143,14 @@ public class Client {
 		
 		private float processRate = 0.f;
 		
-		private Client client = null;
-		
-		public UploadThread(String localPath, String remotePath, String masterIP, int masterPort, Client client){
+		public UploadThread(String localPath, String remotePath, String masterIP, int masterPort){
 			this.localPath = localPath;
 			this.remotePath = remotePath;
 			this.processRate = 0.f;
-			this.client = client;
 			
 			fileOp = new FileOperation(masterIP, masterPort);
 			remoteFileHandle = fileOp.open(this.remotePath, "wr");
-			
+
 		}
 		
 		public float getProcessRate(){
@@ -186,10 +186,6 @@ public class Client {
 				e.printStackTrace();
 			}
  			this.processRate = 1.f;
- 			
- 			if(this.client != null){
- 				this.client.fileHierachy = fileOp.getFileHierarchy();
- 			}
 		}
 	}
 	

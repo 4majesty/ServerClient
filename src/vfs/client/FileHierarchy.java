@@ -86,13 +86,16 @@ public class FileHierarchy {
 		}
 		FileNode bigBrother;
 		do {
-			if (fileNode == null){
-				return null;
-			}
+//			if (fileNode == null){
+//				return null;
+//			}
 //			if (fileNode.brother == null)
 //				return null;
 			bigBrother = fileNode;
 			fileNode = fileNode.brother;
+			if (fileNode == null){
+				return null;
+			}
 		} while (!fileNode.fileName.equals(dirName));
 		bigBrother.brother = fileNode.brother;
 		fileNode.brother = null;

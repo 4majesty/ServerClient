@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import vfs.client.Client;
+import vfs.client.ClientInterface;
 import vfs.struct.RemoteFileInfo;
 
 public class UpdateFileListServlet extends HttpServlet {
@@ -30,24 +30,23 @@ public class UpdateFileListServlet extends HttpServlet {
 		String folderDir = "";
 
 		System.out.println(parentFilePath);
-		String isReturn = request.getParameter("parent_file_path");
-		if (isReturn.equals("1")) {
+		String isReturn = request.getParameter("isReturn");
+
+		if (isReturn.equals("1") && !parentFilePath.equals("vfs")) {
 			String fileRemotePath[] = parentFilePath.split("/");
 			String tmpPath = "";
 			if (fileRemotePath.length > 1) {
 				for (int i = 0; i < fileRemotePath.length - 1; i++) {
-					tmpPath = tmpPath + "/" + fileRemotePath[i];
+					tmpPath = tmpPath + fileRemotePath[i] + "/";
 				}
 				folderDir = tmpPath;
 			} else {
 				folderDir = fileRemotePath[0];
 			}
+			parentFilePath = folderDir;
 		}
-		parentFilePath = folderDir;
-
-		Client client = new Client("127.0.0.1", 8877);
 		List<RemoteFileInfo> updateFileList = new ArrayList<>();
-		updateFileList = client.getRemoteFileInfo(parentFilePath);
+		updateFileList = ClientInterface.client.getRemoteFileInfo(parentFilePath);
 
 		// RemoteFileInfo info1 = new RemoteFileInfo();
 		// info1.fileName = "subfile";
@@ -58,7 +57,7 @@ public class UpdateFileListServlet extends HttpServlet {
 		HttpSession session = request.getSession();
 
 		session.setAttribute("fileList", updateFileList);
-		response.sendRedirect("../index.jsp?dir="+parentFilePath);
+		response.sendRedirect("../index.jsp?dir=" + parentFilePath);
 
 	}
 }
