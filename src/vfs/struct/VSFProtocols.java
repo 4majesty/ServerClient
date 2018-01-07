@@ -9,6 +9,7 @@ public class VSFProtocols {
 	public static final int NEW_CHUNK = 2001;
 	public static final int RELEASE_CHUNK = 2002;
 	public static final int HEART_BEAT_DETECT_TO_SLAVE = 2003;
+	public static final int ASSIGN_MAIN_CHUNK = 2004;
 	
 	
 	public static final int MK_DIR = 3001;
