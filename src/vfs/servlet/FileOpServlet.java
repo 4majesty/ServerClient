@@ -17,7 +17,7 @@ public class FileOpServlet extends HttpServlet {
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		Client client = new Client("127.0.0.1", 8807);
+		Client client = new Client("127.0.0.1", 8877);
 
 		System.out.println("loadservlet");
 		request.setCharacterEncoding("UTF-8");
@@ -25,11 +25,11 @@ public class FileOpServlet extends HttpServlet {
 
 		String filePath = request.getParameter("file_path");
 		String opType = request.getParameter("operation_type");
-
-		if (opType == "download") {
-			client.download(filePath, filePath);
-		} else if (opType == "upload") {
-			client.upload(filePath, filePath);
+		String folderDir = request.getParameter("folderDir");
+		if (opType.equals("download")) {
+			client.download("/Users/zsy/Documents/workspace/Java/download.txt", filePath);
+		} else if (opType.equals("upload")) {
+			client.upload(filePath, folderDir);
 		}
 
 		response.sendRedirect("../index.jsp?");

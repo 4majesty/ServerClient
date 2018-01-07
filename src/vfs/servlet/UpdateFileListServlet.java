@@ -45,7 +45,7 @@ public class UpdateFileListServlet extends HttpServlet {
 		}
 		parentFilePath = folderDir;
 
-		Client client = new Client("127.0.0.1", 8807);
+		Client client = new Client("127.0.0.1", 8877);
 		List<RemoteFileInfo> updateFileList = new ArrayList<>();
 		updateFileList = client.getRemoteFileInfo(parentFilePath);
 
@@ -58,7 +58,7 @@ public class UpdateFileListServlet extends HttpServlet {
 		HttpSession session = request.getSession();
 
 		session.setAttribute("fileList", updateFileList);
-		response.sendRedirect("../index.jsp");
+		response.sendRedirect("../index.jsp?dir="+parentFilePath);
 
 	}
 }

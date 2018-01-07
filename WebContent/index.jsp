@@ -9,15 +9,15 @@
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%
-	Client client = new Client("127.0.0.1", 8807);
+	Client client = new Client("127.0.0.1", 8877);
 
 	List<RemoteFileInfo> fileList = new ArrayList<RemoteFileInfo>();
-	/* if (request.getParameter("fileList") != null) {
-				fileList = (List<RemoteFileInfo>) request.getAttribute("fileList");
-			} else {
-				fileList = client.getRemoteFileInfo("vfs");
-			} */
-	RemoteFileInfo info1 = new RemoteFileInfo();
+	if (session.getAttribute("fileList") != null) {
+		fileList = (List<RemoteFileInfo>) session.getAttribute("fileList");
+	} else {
+		fileList = client.getRemoteFileInfo("vfs");
+	}
+	/* RemoteFileInfo info1 = new RemoteFileInfo();
 	info1.fileName = "file1";
 	info1.fileType = 1;
 	info1.remotePath = "workspace/Client/data/file1";
@@ -40,24 +40,27 @@
 	fileList.add(info3);
 	fileList.add(info3);
 	fileList.add(info3);
-	fileList.add(info3);
+	fileList.add(info3); */
 
-	if (session.getAttribute("fileList") != null) {
-		fileList = (List<RemoteFileInfo>) session.getAttribute("fileList");
-	}
-
-	String fileRemotePath[] = fileList.get(0).remotePath.split("/");
 	String folderDir;
-	String tmpPath = "";
-	if (fileRemotePath.length > 1) {
-		for (int i = 0; i < fileRemotePath.length - 1; i++) {
-			tmpPath = tmpPath + "/" + fileRemotePath[i];
+	if (!fileList.isEmpty()) {
+		String fileRemotePath[] = fileList.get(0).remotePath.split("/");
+		String tmpPath = "";
+		if (fileRemotePath.length > 1) {
+			for (int i = 0; i < fileRemotePath.length - 1; i++) {
+				tmpPath = tmpPath + "/" + fileRemotePath[i];
+			}
+			folderDir = tmpPath;
+		} else {
+			folderDir = fileRemotePath[0];
 		}
-		folderDir = tmpPath;
 	} else {
-		folderDir = fileRemotePath[0];
+		if (request.getAttribute("dir") != null) {
+			folderDir = request.getAttribute("dir").toString();
+		} else {
+			folderDir = "vfs";
+		}
 	}
-
 	String path = request.getContextPath();
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
@@ -94,17 +97,27 @@
 <script src="${path}js/bootstrap-table.js"></script>
 <link href="${path}css/bootstrap-table.css" rel="stylesheet" />
 <script type="text/javascript">
-	function getInputURL() { 
-		var myselect = document.getElementById("fileInput");
+	function getInputURL() {
+		alert('uploading ...');
+ 		//var myselect = document.getElementById("fileInput");
+ 		var select = $("#fileInput").val();
+		var selectPath = select.split("\\");
+		var localFileRoot  = '/Users/zsy/Documents/workspace/Java/';
+		
+		var selectName = selectPath[selectPath.length-1];
+		var select = localFileRoot + selectName;
+		
 		var opType = "upload";
-		window.location.href = "${path}servlet/FileOpServlet?file_path="+myselect+"&operation_type="+opType;
+		var folderName = "<%=folderDir%>";
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+select+"&folderDir="+folderName+"/"+selectName+"&operation_type="+opType;
 	}
 </script>
 <script type="text/javascript">
 	function downloadFile(num) {
-		var downloadPath = document.getElementById(num);
+		var downloadPath = $("#"+num).text();
+		var folderName = "<%=folderDir%>";
 		var opType = "download";
-		window.location.href = "${path}servlet/FileOpServlet?file_path="+downloadPath+"&operation_type="+opType;
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+downloadPath+"&operation_type="+opType;
 	}
 </script>
 <script type="text/javascript">

@@ -659,7 +659,7 @@ public class FileOperation {
 		//content from server
 		DataInputStream input = new DataInputStream(socket.getInputStream());
 		String ret = input.readUTF();     
-        System.out.println("response code: " + ret);    
+        System.out.println("socket, port: " + socket.getPort() + "response code: " + ret);    
 
         int currBufCount = 0;
         if ("OK".equals(ret)) {    

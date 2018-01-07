@@ -79,7 +79,7 @@ public class Client {
 	}
 	
 	public void upload(String localPath, String remotePath){
-		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort);
+		currUploadThread = new UploadThread(localPath, remotePath, this.masterIP, this.masterPort, this);
 		currUploadThread.start();
 //		rootFileNode = this.fileOp.getFileNode();
 
@@ -115,6 +115,7 @@ public class Client {
 		return fileInfoList;
 	}
 	
+	
 	public float getUploadRate(){
 		if(currUploadThread == null){
 			return 1;
@@ -139,13 +140,17 @@ public class Client {
 		
 		private float processRate = 0.f;
 		
-		public UploadThread(String localPath, String remotePath, String masterIP, int masterPort){
+		private Client client = null;
+		
+		public UploadThread(String localPath, String remotePath, String masterIP, int masterPort, Client client){
 			this.localPath = localPath;
 			this.remotePath = remotePath;
 			this.processRate = 0.f;
+			this.client = client;
 			
 			fileOp = new FileOperation(masterIP, masterPort);
 			remoteFileHandle = fileOp.open(this.remotePath, "wr");
+			
 		}
 		
 		public float getProcessRate(){
@@ -181,6 +186,10 @@ public class Client {
 				e.printStackTrace();
 			}
  			this.processRate = 1.f;
+ 			
+ 			if(this.client != null){
+ 				this.client.fileHierachy = fileOp.getFileHierarchy();
+ 			}
 		}
 	}
 	
@@ -275,8 +284,8 @@ public class Client {
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
 //    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc2.txt");
     	
-//    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "vfs/b");
-    	client.download("/Users/zsy/Documents/workspace/Java/download.txt", "vfs/b");
+    	client.upload("/Users/zsy/Documents/workspace/Java/test-bak.txt", "vfs/b");
+    	client.download("/Users/zsy/Documents/workspace/Java/dtest.txt", "vfs/b");
     }
 	
 }
