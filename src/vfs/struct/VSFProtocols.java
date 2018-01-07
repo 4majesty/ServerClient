@@ -19,6 +19,8 @@ public class VSFProtocols {
 	public static final int REMOVE_FILE = 3006;
 	public static final int GET_FILE_NODE = 3007;
 	
+	public static final int RENEW_LEASE = 4001;
+	public static final int HEART_BEAT_DETECT_TO_MASTER = 4002;
 	
 	public static String MESSAGE_OK = "OK";
 	public static String MASTER_REJECT = "FAIL";
