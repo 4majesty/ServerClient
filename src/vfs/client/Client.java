@@ -186,6 +186,13 @@ public class Client {
 				e.printStackTrace();
 			}
  			this.processRate = 1.f;
+ 			
+ 			try {
+				localFis.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -238,6 +245,13 @@ public class Client {
 				e.printStackTrace();
 			}
 			this.processRate = 1.f;
+			
+			try {
+				localFos.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
