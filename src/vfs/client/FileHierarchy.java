@@ -1,5 +1,7 @@
 package vfs.client;
 
+import java.util.ArrayList;
+
 import org.json.JSONObject;
 
 import vfs.struct.FileNode;
@@ -28,11 +30,11 @@ public class FileHierarchy {
 		if (!fileNode.isDir)
 			return false;
 		FileNode parent = fileNode;
-		if (fileNode.child == null){
+		if (fileNode.child == null) {
 			parent.child = new FileNode(dirName, true, parent);
 			return true;
 		}
-		
+
 		fileNode = fileNode.child;
 		while (fileNode.brother != null) {
 			if (fileNode.fileName.equals(dirName))
@@ -64,7 +66,7 @@ public class FileHierarchy {
 		}
 		return fileNode;
 	}
-	
+
 	public FileNode OpenDir(String path) {
 		return pathToFileNode(path);
 	}
@@ -86,14 +88,14 @@ public class FileHierarchy {
 		}
 		FileNode bigBrother;
 		do {
-//			if (fileNode == null){
-//				return null;
-//			}
-//			if (fileNode.brother == null)
-//				return null;
+			// if (fileNode == null){
+			// return null;
+			// }
+			// if (fileNode.brother == null)
+			// return null;
 			bigBrother = fileNode;
 			fileNode = fileNode.brother;
-			if (fileNode == null){
+			if (fileNode == null) {
 				return null;
 			}
 		} while (!fileNode.fileName.equals(dirName));
@@ -113,10 +115,15 @@ public class FileHierarchy {
 	}
 
 	private FileNode pathToFileNode(String path) {
-		String[] names = path.split("[/\\\\]");
+		String[] tempNames = path.split("[/\\\\]");
 		FileNode fileNode = root;
-		for (int i = 1; i < names.length; i++) {
-			fileNode = fileNode.findChildWithName(names[i]);
+		ArrayList<String> names = new ArrayList<String>();
+		for (String name : tempNames) {
+			if (!name.equals(""))
+				names.add(name);
+		}
+		for (int i = 1; i < names.size(); i++) {
+			fileNode = fileNode.findChildWithName(names.get(i));
 			if (fileNode == null)
 				return null;
 		}

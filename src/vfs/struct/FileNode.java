@@ -62,7 +62,7 @@ public class FileNode {
 		String s = new String();
 		FileNode f = parent;
 		while (f != null) {
-			s += f.fileName + "/";
+			s = "/" + f.fileName + s;
 			f = f.parent;
 		}
 		return s;
