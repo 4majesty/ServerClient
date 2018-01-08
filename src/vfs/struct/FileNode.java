@@ -65,7 +65,7 @@ public class FileNode {
 			s = "/" + f.fileName + s;
 			f = f.parent;
 		}
-		return s;
+		return s.substring(1);
 	}
 
 	public JSONObject toJSON() {
