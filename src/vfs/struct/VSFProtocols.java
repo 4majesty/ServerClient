@@ -22,6 +22,8 @@ public class VSFProtocols {
 	
 	public static final int RENEW_LEASE = 4001;
 	public static final int HEART_BEAT_DETECT_TO_MASTER = 4002;
+	public static final int WRITE_COPY = 4003;
+	public static final int CREATE_COPY = 4004;
 	
 	public static String MESSAGE_OK = "OK";
 	public static String MASTER_REJECT = "FAIL";
