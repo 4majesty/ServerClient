@@ -16,7 +16,7 @@
 		fileList = (List<RemoteFileInfo>) session.getAttribute("fileList");
 	} else {
 		fileList = ClientInterface.client.getRemoteFileInfo("vfs");
-		if(!fileList.isEmpty()){
+		if (!fileList.isEmpty()) {
 			System.out.println(fileList.get(0).fileName);
 		}
 	}
@@ -45,33 +45,21 @@
 	fileList.add(info3);
 	fileList.add(info3); */
 
-/* 	Map<String, Client> downloadClients = new HashMap<>();
-	Map<String, Client> uploadClients = new HashMap<>();
-	if (session.getAttribute("downloads") != null) {
-		downloadClients = (Map<String, Client>) session.getAttribute("downloads");
-	}
-	if (session.getAttribute("uploads") != null) {
-		uploadClients = (Map<String, Client>) session.getAttribute("uploads");
-	} */
+	/* 	Map<String, Client> downloadClients = new HashMap<>();
+		Map<String, Client> uploadClients = new HashMap<>();
+		if (session.getAttribute("downloads") != null) {
+			downloadClients = (Map<String, Client>) session.getAttribute("downloads");
+		}
+		if (session.getAttribute("uploads") != null) {
+			uploadClients = (Map<String, Client>) session.getAttribute("uploads");
+		} */
 
 	String folderDir;
-	if (!fileList.isEmpty()) {
-		String fileRemotePath[] = fileList.get(0).remotePath.split("/");
-		String tmpPath = "";
-		if (fileRemotePath.length > 1) {
-			for (int i = 0; i < fileRemotePath.length - 1; i++) {
-				tmpPath = tmpPath + "/" + fileRemotePath[i];
-			}
-			folderDir = tmpPath;
-		} else {
-			folderDir = fileRemotePath[0];
-		}
+
+	if (request.getParameter("dir") != null) {
+		folderDir = request.getParameter("dir").toString();
 	} else {
-		if (request.getParameter("dir") != null) {
-			folderDir = request.getParameter("dir").toString();
-		} else {
-			folderDir = "vfs";
-		}
+		folderDir = "vfs";
 	}
 	String path = request.getContextPath();
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
@@ -121,7 +109,7 @@
 		
 		var opType = "upload";
 		var folderName = "<%=folderDir%>";
-		window.location.href = "${path}servlet/FileOpServlet?file_path="+select+"&folderDir="+folderName+"/"+selectName+"&operation_type="+opType;
+		window.location.href = "${path}servlet/FileOpServlet?selectFile="+select+"&file_path="+folderName+"&folderDir="+selectName+"&operation_type="+opType;
 	}
 </script>
 <script type="text/javascript">
@@ -129,7 +117,7 @@
 		var downloadPath = $("#"+num).text();
 		var folderName = "<%=folderDir%>";
 		var opType = "download";
-		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+downloadPath+"&operation_type="+opType;
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"&folderDir="+downloadPath+"&operation_type="+opType;
 	}
 </script>
 <script type="text/javascript">
@@ -138,7 +126,7 @@
 		var folderName = "<%=folderDir%>";
 		var opType = "delete";
 		//alert(folderName+"/"+downloadPath);
-		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+downloadPath+"&operation_type="+opType;
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"&folderDir="+downloadPath+"&operation_type="+opType;
 	}
 </script>
 <script type="text/javascript">
@@ -161,7 +149,7 @@
 		var opType = "create";
 		var folderName = "<%=folderDir%>";
 		//alert(folderName+"/"+dirName);
-		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"/"+dirName+"&operation_type="+opType;	}
+		window.location.href = "${path}servlet/FileOpServlet?file_path="+folderName+"&folderDir="+dirName+"&operation_type="+opType;	}
 </script>
 <!-- <script type="text/javascript">
 	function getDownloads() {
@@ -211,8 +199,12 @@
 										Client c = entry.getValue();
 										float rate = c.getDownloadRate(); */
 								%>
-								<td><%-- <%=entry.getKey()%> --%></td>
-								<td><%-- <%=rate%> --%></td>
+								<td>
+									<%-- <%=entry.getKey()%> --%>
+								</td>
+								<td>
+									<%-- <%=rate%> --%>
+								</td>
 								<%
 									/* } */
 								%>
@@ -249,8 +241,12 @@
 										Client c = entry.getValue();
 										float rate = c.getDownloadRate(); */
 								%>
-								<td><%-- <%=entry.getKey()%> --%></td>
-								<td><%-- <%=rate%> --%></td>
+								<td>
+									<%-- <%=entry.getKey()%> --%>
+								</td>
+								<td>
+									<%-- <%=rate%> --%>
+								</td>
 								<%
 									/* } */
 								%>
@@ -333,8 +329,8 @@
 				<%
 					} else if (fileList.get(fileNum).fileType == 1) {
 				%>
-				<td id=<%=fileNum%>><a
-					href="javascript:void(0);" onclick="getSubFiles(<%=fileNum%>)"><%=fileList.get(fileNum).fileName%></a></td>
+				<td id=<%=fileNum%>><a href="javascript:void(0);"
+					onclick="getSubFiles(<%=fileNum%>)"><%=fileList.get(fileNum).fileName%></a></td>
 
 				<td><span class="glyphicon glyphicon-folder-close"
 					aria-hidden="true"></span></td>

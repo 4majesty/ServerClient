@@ -1,7 +1,9 @@
 package vfs.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import vfs.client.Client;
 import vfs.client.ClientInterface;
+import vfs.struct.RemoteFileInfo;
 
 
 public class FileOpServlet extends HttpServlet {
@@ -45,23 +48,32 @@ public class FileOpServlet extends HttpServlet {
 		String filePath = request.getParameter("file_path");
 		String opType = request.getParameter("operation_type");
 		String folderDir = request.getParameter("folderDir");
+		String selectFile = request.getParameter("selectFile");
+
+		HttpSession session = request.getSession();
+		List<RemoteFileInfo> updateFileList = new ArrayList<>();
+
 		if (opType.equals("download")) {
-			ClientInterface.client.download("/Users/zsy/Documents/workspace/Java/download.txt", filePath);
+			ClientInterface.client.download("/Users/zsy/Documents/workspace/Java/download.txt", filePath+"/"+folderDir);
 		} else if (opType.equals("upload")) {
-			ClientInterface.client.upload(filePath, folderDir);
+			ClientInterface.client.upload(selectFile,filePath+"/"+folderDir);
+			updateFileList = ClientInterface.client.getRemoteFileInfo(filePath);
+			session.setAttribute("fileList", updateFileList);
 		} else if (opType.equals("create")) {
 			boolean T = true;
-			ClientInterface.client.create(filePath, T);
+			ClientInterface.client.create(filePath+"/"+folderDir, T);
+			updateFileList = ClientInterface.client.getRemoteFileInfo(filePath);
+			session.setAttribute("fileList", updateFileList);
 		} else if (opType.equals("getDownloads")) {
-			HttpSession session = request.getSession();
 			session.setAttribute("downloads", getDownloadClients());
 		} else if (opType.equals("getUploads")) {
-			HttpSession session = request.getSession();
 			session.setAttribute("uploads", getUploadClients());
 		} else if (opType.equals("delete")) {
-			ClientInterface.client.delete(filePath);
+			ClientInterface.client.delete(filePath+"/"+folderDir);
+			updateFileList = ClientInterface.client.getRemoteFileInfo(filePath);
+			session.setAttribute("fileList", updateFileList);
 		}
-		response.sendRedirect("../index.jsp");
+		response.sendRedirect("../index.jsp?dir=" + filePath);
 
 	}
 }

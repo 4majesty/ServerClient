@@ -37,7 +37,11 @@ public class UpdateFileListServlet extends HttpServlet {
 			String tmpPath = "";
 			if (fileRemotePath.length > 1) {
 				for (int i = 0; i < fileRemotePath.length - 1; i++) {
-					tmpPath = tmpPath + fileRemotePath[i] + "/";
+					if (i == fileRemotePath.length - 2) {
+						tmpPath = tmpPath + fileRemotePath[i];
+					} else {
+						tmpPath = tmpPath + fileRemotePath[i] + "/";
+					}
 				}
 				folderDir = tmpPath;
 			} else {
