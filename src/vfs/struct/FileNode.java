@@ -34,16 +34,21 @@ public class FileNode {
 		chunkIDList.add(chunkID);
 	}
 
-	public void removeChunk(int chunkID) {
+	public int changeChunk(ArrayList<Integer> chunkIds, int newChunkId) {
 		for (int i = 0; i < chunkIDList.size(); i++) {
-			if (chunkIDList.get(i) == chunkID)
-				chunkIDList.remove(i);
+			for (int j = 0; j < chunkIds.size(); ++j) {
+				if (chunkIDList.get(i) == chunkIds.get(j)) {
+					chunkIDList.set(i, newChunkId);
+					return i;
+				}
+			}
 		}
+		return -1;
 	}
 
 	public FileNode findChildWithName(String name) {
 		FileNode f = child;
-		if(f == null){
+		if (f == null) {
 			return null;
 		}
 		while (true) {

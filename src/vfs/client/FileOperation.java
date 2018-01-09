@@ -315,7 +315,7 @@ public class FileOperation {
 			chunkNum = 1 + (int) Math.ceil((nbyteLeft - (CHUNK_SIZE - firstChunkOffset))/CHUNK_SIZE);
 		}
 		
-		System.out.println("handle.getMaxChunkIndex(): " + handle.getMaxChunkIndex());
+		
 		int maxChunIndx = handle.getMaxChunkIndex();
 		if(maxChunIndx < firstChunkIndex + chunkNum - 1){
 			handle = this.addChunk(handle, firstChunkIndex + chunkNum - 1 - maxChunIndx);
@@ -323,6 +323,7 @@ public class FileOperation {
 				return -1;
 			}
 		}
+		System.out.println("handle.getMaxChunkIndex(): " + handle.getMaxChunkIndex());
 		
 		byte[] chunkBuf = new byte[CHUNK_SIZE];
 		int writeByteCount = 0;
