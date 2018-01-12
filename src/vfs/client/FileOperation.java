@@ -668,7 +668,8 @@ public class FileOperation {
         	
         	byte[] tempBuf = new byte[FileOperation.DOWNLOAD_BUFFER_SIZE];
         	
-        	while(true){
+//        	while(true){
+        	for(int try_i = 0; try_i < 100*FileOperation.DOWNLOAD_BUFFER_SIZE; ++try_i){    // try 100*FileOperation.DOWNLOAD_BUFFER_SIZE times most
         		if(currBufCount >= totalSize){
         			break;
         		}

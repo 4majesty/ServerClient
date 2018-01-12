@@ -178,7 +178,10 @@ public class Client {
 			byte[] buf = new byte[bufferSize];
  			try {
  				while((readsize = localFis.read(buf, 0, buf.length))>0){
- 					fileOp.write(remoteFileHandle, buf, readsize);
+ 					if(fileOp.write(remoteFileHandle, buf, readsize) != readsize){
+ 						System.out.println("fail to write file "+ remoteFileHandle.fileInfo.fileName 
+ 								+ " at the offset of " + remoteFileHandle.offset);
+ 					}
  					this.processRate += readsize/Math.max(1.f, fileSize);
  				}
 			} catch (IOException e) {
@@ -270,32 +273,32 @@ public class Client {
 		return names[names.length-1];
 	}
 	
-    public static void main(String[] args) {
-//        List<Integer> list = new LinkedList<Integer>();
-//        
-//        list.add(1);
-//        list.add(2);
-//        
-//        System.out.println(list);
-//         
-//        list.remove(new Integer(2));
-//        
-//        System.out.println(list);
-//        
-//        System.out.println('\0');
-    	String ipAddr = "localhost";
-    	
-    	Client client = new Client(ipAddr, 8877);
-    	
-//    	client.create("vfs/zsy", true);
+//    public static void main(String[] args) {
+////        List<Integer> list = new LinkedList<Integer>();
+////        
+////        list.add(1);
+////        list.add(2);
+////        
+////        System.out.println(list);
+////         
+////        list.remove(new Integer(2));
+////        
+////        System.out.println(list);
+////        
+////        System.out.println('\0');
+//    	String ipAddr = "localhost";
+//    	
+//    	Client client = new Client(ipAddr, 8877);
+//    	
+////    	client.create("vfs/zsy", true);
+//////    	client.delete("vfs/b");
+////    	client.getRemoteFileInfo("vfs");
 ////    	client.delete("vfs/b");
-//    	client.getRemoteFileInfo("vfs");
-//    	client.delete("vfs/b");
-//    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
-//    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc2.txt");
-    	
-    	client.upload("/Users/zsy/Documents/workspace/Java/test-bak.txt", "vfs/b");
-    	client.download("/Users/zsy/Documents/workspace/Java/dtest.txt", "vfs/b");
-    }
+////    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc1.txt");
+////    	client.upload("/Users/zsy/Documents/workspace/Java/test.txt", "/Users/zsy/Documents/workspace/Java/abc2.txt");
+//    	
+//    	client.upload("/Users/zsy/Documents/workspace/Java/test-bak.txt", "vfs/b");
+//    	client.download("/Users/zsy/Documents/workspace/Java/dtest.txt", "vfs/b");
+//    }
 	
 }
